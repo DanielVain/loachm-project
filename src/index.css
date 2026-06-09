@@ -7,28 +7,30 @@ html {
 }
 
 [data-theme="light"] {
-    --bg: #ede9dc;
-    --bg-2: #e3dece;
-    --card: #f8f6ec;
-    --text: #1c1d16;
-    --mute: #6f6a5a;
-    --rule: #d1ccb8;
-    --rule-soft: #e0dccb;
+    --bg: #eef2f8;
+    --bg-2: #e4ebf5;
+    --card: #f8fafd;
+    --text: #161b24;
+    --mute: #5f6b7c;
+    --rule: #d2dcea;
+    --rule-soft: #e3eaf4;
     --green-bg: #98c838;
     --green-text: #98c838;
-    --scan: rgba(28, 29, 22, 0.025);
+    --blue: #2f9be6;
+    --scan: rgba(22, 27, 36, 0.025);
 }
 [data-theme="dark"] {
-    --bg: #0d0e0a;
-    --bg-2: #121309;
-    --card: #17180f;
-    --text: #ebe8da;
-    --mute: #8b8876;
-    --rule: #2a2b1e;
-    --rule-soft: #1e1f15;
+    --bg: #0a0f18;
+    --bg-2: #0d1320;
+    --card: #111827;
+    --text: #e9eef6;
+    --mute: #8493a6;
+    --rule: #20293a;
+    --rule-soft: #18202e;
     --green-bg: #98c838;
     --green-text: #98c838;
-    --scan: rgba(152, 200, 56, 0.025);
+    --blue: #38bdf8;
+    --scan: rgba(56, 189, 248, 0.03);
 }
 
 body {
@@ -218,4 +220,134 @@ body {
 
 [data-theme="light"] .stroke-soft {
     -webkit-text-stroke: 0.5px #131310;
+}
+
+/* ── NONSTOP section: deep navy with bright blue gradient glow ── */
+.nonstop-section {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    color: #eaf2fb;
+    background:
+        radial-gradient(
+            1200px 500px at 80% -10%,
+            rgba(56, 189, 248, 0.14),
+            transparent 60%
+        ),
+        linear-gradient(180deg, #0a1426 0%, #060b18 60%, #050912 100%);
+}
+.nonstop-inner {
+    position: relative;
+    z-index: 1;
+}
+.nonstop-glow {
+    position: absolute;
+    z-index: 0;
+    border-radius: 9999px;
+    filter: blur(90px);
+    pointer-events: none;
+    opacity: 0.6;
+}
+.nonstop-glow--a {
+    width: 540px;
+    height: 540px;
+    top: -200px;
+    right: -120px;
+    background: radial-gradient(circle, #22d3ee 0%, transparent 68%);
+}
+.nonstop-glow--b {
+    width: 520px;
+    height: 520px;
+    bottom: -220px;
+    left: -120px;
+    background: radial-gradient(circle, #3b82f6 0%, transparent 68%);
+}
+.nonstop-accent {
+    color: #5cc6f5;
+}
+.nonstop-accent-bar {
+    display: inline-block;
+    background-color: #5cc6f5;
+}
+.nonstop-accent-text {
+    color: #5cc6f5;
+}
+.nonstop-wordmark {
+    background: linear-gradient(90deg, #93e2ff 0%, #38bdf8 45%, #2563eb 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+/* Blue-themed product tiles inside the NONSTOP panel */
+.nonstop-section .nonstop-tile {
+    border-color: rgba(120, 180, 255, 0.22);
+    background-color: rgba(120, 180, 255, 0.04);
+}
+.nonstop-section .nonstop-tile:hover {
+    background-color: #38bdf8;
+    color: #05111f;
+    border-color: #7dd3fc;
+    box-shadow: 0 0 32px rgba(56, 189, 248, 0.35);
+}
+
+/* ── Product photo on board cards ── */
+.deal-photo {
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    border: 1px solid var(--rule-soft);
+    background-color: var(--bg-2);
+}
+.deal-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Admin / CMS ── */
+.admin-shell {
+    background-color: var(--bg);
+    color: var(--text);
+}
+.cms-input {
+    width: 100%;
+    background-color: var(--card);
+    border: 1px solid var(--rule);
+    color: var(--text);
+    padding: 8px 10px;
+    font-size: 0.9rem;
+    font-family: "Manrope", "Heebo", system-ui, sans-serif;
+    border-radius: 2px;
+}
+.cms-input:focus {
+    outline: 2px solid var(--green-bg);
+    outline-offset: 0;
+}
+.cms-thumb {
+    width: 96px;
+    height: 96px;
+    border: 1px solid var(--rule);
+    background-color: var(--bg-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.cms-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.cms-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: 1px solid var(--rule);
+    padding: 4px 8px;
+    color: var(--text);
+    border-radius: 2px;
+}
+.cms-upload:hover {
+    background-color: var(--bg-2);
 }
