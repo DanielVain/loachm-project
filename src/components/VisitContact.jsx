@@ -8,6 +8,10 @@ export default function VisitContact() {
     const { content } = useContent();
     const c = content.contact;
 
+    // Build a wa.me link: strip non-digits, drop a leading 0, prepend 972 (IL).
+    const waNumber = "972" + c.whatsapp.replace(/\D/g, "").replace(/^0/, "");
+    const waLink = `https://wa.me/${waNumber}`;
+
     return (
         <section id="visit" className="t-bg">
             <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-14 md:py-20">
@@ -87,9 +91,15 @@ export default function VisitContact() {
                         <div className="t-mute mb-2 text-sm">
                             לבדיקת מלאי, הצעות מחיר וטרייד-אין.
                         </div>
-                        <div className="font-mono text-sm font-bold" dir="ltr">
+                        <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-mono text-sm font-bold h-green transition-colors"
+                            dir="ltr"
+                        >
                             {c.whatsapp}
-                        </div>
+                        </a>
                     </div>
                 </div>
 

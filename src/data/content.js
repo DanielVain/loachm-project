@@ -83,7 +83,7 @@ export const DEFAULT_CONTENT = {
     contact: {
         phone: "058-7748846",
         phoneTel: "+972587748846",
-        whatsapp: "058-7748846",
+        whatsapp: "051-5454891",
         street: "דוד שכטמן 10",
         addressHe: "מול החוף וילג'",
         city: "חדרה",
