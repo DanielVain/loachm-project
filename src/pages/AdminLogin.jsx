@@ -1,22 +1,29 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Lock } from "lucide-react";
-import { login } from "../store/auth.js";
+import { useAuth } from "../store/AuthContext.jsx";
 import Brand from "../components/Brand.jsx";
 
-/** Password gate for the CMS. On success, redirects to /admin/cms. */
+/** Email + password gate (Supabase Auth). On success → /admin/cms. */
 export default function AdminLogin() {
     const navigate = useNavigate();
+    const { signIn } = useAuth();
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(false);
+    const [error, setError] = useState("");
+    const [busy, setBusy] = useState(false);
 
-    function onSubmit(e) {
+    async function onSubmit(e) {
         e.preventDefault();
-        if (login(password)) {
-            navigate("/admin/cms");
-        } else {
-            setError(true);
+        setBusy(true);
+        setError("");
+        const err = await signIn(email.trim(), password);
+        setBusy(false);
+        if (err) {
+            setError("התחברות נכשלה — בדקו אימייל וסיסמה.");
             setPassword("");
+        } else {
+            navigate("/admin/cms");
         }
     }
 
@@ -37,30 +44,46 @@ export default function AdminLogin() {
                     onSubmit={onSubmit}
                     className="t-card border t-rule p-6 flex flex-col gap-4"
                 >
+                    <label className="uppercase-mono t-mute">אימייל</label>
+                    <input
+                        type="email"
+                        autoFocus
+                        dir="ltr"
+                        value={email}
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError("");
+                        }}
+                        className="cms-input"
+                        placeholder="admin@example.com"
+                    />
                     <label className="uppercase-mono t-mute">סיסמה</label>
                     <input
                         type="password"
-                        autoFocus
                         dir="ltr"
                         value={password}
                         onChange={(e) => {
                             setPassword(e.target.value);
-                            setError(false);
+                            setError("");
                         }}
                         className="cms-input"
                         placeholder="••••••••"
                     />
                     {error && (
-                        <div className="text-sm font-mono" style={{ color: "#e5484d" }}>
-                            סיסמה שגויה
+                        <div
+                            className="text-sm font-mono"
+                            style={{ color: "#e5484d" }}
+                        >
+                            {error}
                         </div>
                     )}
                     <button
                         type="submit"
-                        className="t-green-bg py-3 font-bold text-sm"
+                        disabled={busy}
+                        className="t-green-bg py-3 font-bold text-sm disabled:opacity-60"
                         style={{ color: "#0a0a0a" }}
                     >
-                        כניסה
+                        {busy ? "מתחבר…" : "כניסה"}
                     </button>
                     <Link
                         to="/"

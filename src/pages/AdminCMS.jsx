@@ -1,22 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Plus, Trash2, ImagePlus, X, LogOut, RotateCcw } from "lucide-react";
+import { Plus, Trash2, ImagePlus, X, LogOut, Loader2 } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
+import { useAuth } from "../store/AuthContext.jsx";
+import { uploadProductImage } from "../store/supabase.js";
 import { ICON_CHOICES, iconFor, pct } from "../data/content.js";
-import { logout } from "../store/auth.js";
 import Brand from "../components/Brand.jsx";
 
-const MAX_IMAGE_BYTES = 1_500_000; // ~1.5 MB after encoding; keep localStorage sane
-
-/** Read a File into a compressed-ish data URL we can store inline. */
-function fileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
+const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
 
 function Field({ label, children }) {
     return (
@@ -29,18 +20,26 @@ function Field({ label, children }) {
 
 function DealEditor({ deal, onChange, onRemove }) {
     const [imgError, setImgError] = useState("");
+    const [uploading, setUploading] = useState(false);
     const Icon = iconFor(deal.icon);
 
     async function onPickImage(e) {
         const file = e.target.files?.[0];
         if (!file) return;
         if (file.size > MAX_IMAGE_BYTES) {
-            setImgError("התמונה גדולה מדי (מקסימום ~1.5MB). בחרו תמונה קטנה יותר.");
+            setImgError("התמונה גדולה מדי (מקסימום 5MB).");
             return;
         }
         setImgError("");
-        const url = await fileToDataUrl(file);
-        onChange({ image: url });
+        setUploading(true);
+        try {
+            const url = await uploadProductImage(file);
+            onChange({ image: url });
+        } catch (err) {
+            setImgError("העלאת התמונה נכשלה: " + (err.message || ""));
+        } finally {
+            setUploading(false);
+        }
     }
 
     return (
@@ -49,7 +48,9 @@ function DealEditor({ deal, onChange, onRemove }) {
                 {/* image / thumbnail */}
                 <div className="flex flex-col items-center gap-2 w-28 flex-shrink-0">
                     <div className="cms-thumb">
-                        {deal.image ? (
+                        {uploading ? (
+                            <Loader2 className="w-6 h-6 t-mute animate-spin" />
+                        ) : deal.image ? (
                             <img src={deal.image} alt={deal.name} />
                         ) : (
                             <Icon className="w-8 h-8 t-mute" strokeWidth={1.3} />
@@ -149,9 +150,7 @@ function DealEditor({ deal, onChange, onRemove }) {
                         <input
                             type="checkbox"
                             checked={deal.hot}
-                            onChange={(e) =>
-                                onChange({ hot: e.target.checked })
-                            }
+                            onChange={(e) => onChange({ hot: e.target.checked })}
                         />
                         <span className="uppercase-mono">מוצר חם 🔥</span>
                     </label>
@@ -166,7 +165,10 @@ function DealEditor({ deal, onChange, onRemove }) {
             </div>
 
             {imgError && (
-                <div className="text-sm font-mono mt-3" style={{ color: "#e5484d" }}>
+                <div
+                    className="text-sm font-mono mt-3"
+                    style={{ color: "#e5484d" }}
+                >
                     {imgError}
                 </div>
             )}
@@ -187,13 +189,21 @@ function DealEditor({ deal, onChange, onRemove }) {
 }
 
 export default function AdminCMS() {
-    const { content, addDeal, updateDeal, removeDeal, resetContent } =
+    const { content, loading, addDeal, updateDeal, removeDeal, seedSamples } =
         useContent();
+    const { signOut } = useAuth();
     const navigate = useNavigate();
+    const [seeding, setSeeding] = useState(false);
 
-    function onLogout() {
-        logout();
+    async function onLogout() {
+        await signOut();
         navigate("/admin");
+    }
+
+    async function onSeed() {
+        setSeeding(true);
+        await seedSamples();
+        setSeeding(false);
     }
 
     return (
@@ -202,7 +212,9 @@ export default function AdminCMS() {
                 <div className="max-w-[1100px] mx-auto px-5 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Brand size="text-xl" />
-                        <span className="uppercase-mono t-mute">/ ניהול הלוח</span>
+                        <span className="uppercase-mono t-mute">
+                            / ניהול הלוח
+                        </span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Link
@@ -229,8 +241,8 @@ export default function AdminCMS() {
                             פריטי הלוח
                         </h1>
                         <p className="t-mute text-sm mt-1">
-                            {content.deals.length} פריטים · נשמר אוטומטית בדפדפן
-                            זה.
+                            {content.deals.length} פריטים · נשמר אוטומטית ומסונכרן
+                            לכל המבקרים.
                         </p>
                     </div>
                     <button
@@ -252,32 +264,40 @@ export default function AdminCMS() {
                             onRemove={() => removeDeal(deal.id)}
                         />
                     ))}
-                    {content.deals.length === 0 && (
-                        <div className="t-mute font-mono text-sm py-12 text-center border t-rule">
-                            אין פריטים. לחצו "פריט חדש" כדי להתחיל.
+
+                    {!loading && content.deals.length === 0 && (
+                        <div className="t-mute font-mono text-sm py-12 text-center border t-rule flex flex-col items-center gap-4">
+                            <span>הלוח ריק.</span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => addDeal()}
+                                    className="uppercase-mono border t-rule px-3 py-2 h-green"
+                                >
+                                    + פריט חדש
+                                </button>
+                                <button
+                                    onClick={onSeed}
+                                    disabled={seeding}
+                                    className="uppercase-mono border t-rule px-3 py-2 disabled:opacity-60"
+                                >
+                                    {seeding ? "טוען…" : "טען פריטי דוגמה"}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {loading && (
+                        <div className="t-mute font-mono text-sm py-12 text-center">
+                            טוען…
                         </div>
                     )}
                 </div>
 
-                <div className="mt-10 pt-6 border-t t-rule flex items-center justify-between">
-                    <p className="uppercase-mono t-mute max-w-md">
-                        שינויים נשמרים בדפדפן הזה בלבד (MVP). מעבר לשרת אמיתי
-                        יסונכרן בין כל המבקרים.
+                <div className="mt-10 pt-6 border-t t-rule">
+                    <p className="uppercase-mono t-mute max-w-xl">
+                        השינויים נשמרים בענן (Supabase) ומופיעים מיד אצל כל מי
+                        שגולש באתר.
                     </p>
-                    <button
-                        onClick={() => {
-                            if (
-                                confirm(
-                                    "לאפס את כל התוכן לברירת המחדל? פעולה זו תמחק את כל השינויים.",
-                                )
-                            )
-                                resetContent();
-                        }}
-                        className="uppercase-mono border t-rule px-3 py-2 flex items-center gap-1.5"
-                    >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        איפוס
-                    </button>
                 </div>
             </main>
         </div>
