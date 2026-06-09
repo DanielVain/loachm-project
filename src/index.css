@@ -1,5 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@400;700;900&display=swap");
 
+/* ── Fluid base type: scales the whole UI a bit larger and grows with the
+   viewport. All rem-based sizes (text + spacing) follow this automatically. */
+html {
+    font-size: clamp(16.5px, 14.5px + 0.55vw, 19px);
+}
+
 [data-theme="light"] {
     --bg: #ede9dc;
     --bg-2: #e3dece;
@@ -84,7 +90,7 @@ body {
     font-family: "JetBrains Mono", monospace;
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    font-size: 10px;
+    font-size: 0.7rem;
 }
 
 /* ── Ticker ── */
@@ -172,17 +178,17 @@ body {
 }
 .hours-row .days {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 0.9rem;
     white-space: nowrap;
 }
 .hours-row .time {
     font-family: "JetBrains Mono", monospace;
-    font-size: 14px;
+    font-size: 0.9rem;
     text-align: right;
 }
 .hours-row .note {
     font-family: "JetBrains Mono", monospace;
-    font-size: 10px;
+    font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.14em;
     color: var(--mute);

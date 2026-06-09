@@ -418,7 +418,7 @@ export default function MloachLanding() {
             >
                 <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-14 md:py-20">
                     <div
-                        className="font-mono uppercase tracking-[0.14em] text-[10px] mb-8 flex items-center gap-3"
+                        className="font-mono uppercase tracking-[0.14em] text-[0.7rem] mb-8 flex items-center gap-3"
                         style={{ color: "var(--green-bg)" }}
                     >
                         <span
@@ -484,7 +484,7 @@ export default function MloachLanding() {
                                     style={{ borderColor: "#2a2a2a" }}
                                 >
                                     <div className="flex items-start justify-between mb-6">
-                                        <span className="font-mono uppercase text-[10px] tracking-wider">
+                                        <span className="font-mono uppercase text-[0.7rem] tracking-wider">
                                             {item.type}
                                         </span>
                                         {Icon && (
@@ -498,7 +498,7 @@ export default function MloachLanding() {
                                         {item.name}
                                     </div>
                                     <div className="flex items-baseline gap-2">
-                                        <span className="font-mono text-[10px] uppercase opacity-70">
+                                        <span className="font-mono text-[0.7rem] uppercase opacity-70">
                                             החל מ-
                                         </span>
                                         <span className="font-display text-xl md:text-2xl">
@@ -536,7 +536,7 @@ export default function MloachLanding() {
                                 >
                                     {d.hot && (
                                         <div
-                                            className="absolute top-0 left-0 t-green-bg px-2 py-1 font-mono text-[10px] font-bold tracking-wider flex items-center gap-1"
+                                            className="absolute top-0 left-0 t-green-bg px-2 py-1 font-mono text-[0.7rem] font-bold tracking-wider flex items-center gap-1"
                                             style={{ color: "#0a0a0a" }}
                                         >
                                             <Flame
@@ -567,7 +567,7 @@ export default function MloachLanding() {
                                                 {fmt(d.was)} ₪
                                             </span>
                                             <span
-                                                className="t-green-bg px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                                                className="t-green-bg px-1.5 py-0.5 font-mono text-[0.7rem] font-bold"
                                                 style={{ color: "#0a0a0a" }}
                                             >
                                                 −{pct(d.was, d.now)}%
