@@ -150,7 +150,7 @@ body {
     }
 }
 .led {
-    animation: blink 2.8s ease-in-out infinite;
+    animation: blink 4.2s ease-in-out infinite;
     background-color: var(--green-bg);
     display: inline-block;
     border-radius: 9999px;
