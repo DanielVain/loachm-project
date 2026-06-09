@@ -1,0 +1,216 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@400;700;900&display=swap");
+
+[data-theme="light"] {
+    --bg: #ede9dc;
+    --bg-2: #e3dece;
+    --card: #f8f6ec;
+    --text: #1c1d16;
+    --mute: #6f6a5a;
+    --rule: #d1ccb8;
+    --rule-soft: #e0dccb;
+    --green-bg: #98c838;
+    --green-text: #98c838;
+    --scan: rgba(28, 29, 22, 0.025);
+}
+[data-theme="dark"] {
+    --bg: #0d0e0a;
+    --bg-2: #121309;
+    --card: #17180f;
+    --text: #ebe8da;
+    --mute: #8b8876;
+    --rule: #2a2b1e;
+    --rule-soft: #1e1f15;
+    --green-bg: #98c838;
+    --green-text: #98c838;
+    --scan: rgba(152, 200, 56, 0.025);
+}
+
+body {
+    margin: 0;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Manrope", "Heebo", system-ui, sans-serif;
+    transition:
+        background-color 0.3s,
+        color 0.3s;
+}
+
+.t-bg {
+    background-color: var(--bg);
+}
+.t-bg-2 {
+    background-color: var(--bg-2);
+}
+.t-card {
+    background-color: var(--card);
+}
+.t-text {
+    color: var(--text);
+}
+.t-mute {
+    color: var(--mute);
+}
+.t-rule {
+    border-color: var(--rule);
+}
+.t-rule-soft {
+    border-color: var(--rule-soft);
+}
+.t-green {
+    color: var(--green-text);
+    font-weight: 700;
+}
+.t-green-bg {
+    background-color: var(--green-bg);
+}
+
+.font-display {
+    font-family: "Archivo Black", "Heebo", sans-serif;
+    letter-spacing: -0.02em;
+}
+.font-mono {
+    font-family: "JetBrains Mono", monospace;
+}
+.font-heb {
+    font-family: "Heebo", sans-serif;
+}
+.font-brand {
+    font-family: "Archivo Black", "Heebo", sans-serif;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+}
+
+.uppercase-mono {
+    font-family: "JetBrains Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 10px;
+}
+
+/* ── Ticker ── */
+@keyframes ticker {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+.ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker 42s linear infinite;
+}
+.ticker-track:hover {
+    animation-play-state: paused;
+}
+
+/* ── Hero scanlines ── */
+.scanlines {
+    background-image: repeating-linear-gradient(
+        0deg,
+        transparent 0 2px,
+        var(--scan) 2px 3px
+    );
+}
+
+/* ── Card hover ── */
+.deal-card {
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease;
+}
+.deal-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--green-bg);
+}
+.deal-card:hover .deal-cta {
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+    border-color: var(--green-bg);
+}
+.deal-card:hover .deal-icon {
+    color: var(--green-text);
+}
+
+/* ── Blinking LED ── */
+@keyframes blink {
+    0%,
+    60% {
+        opacity: 1;
+    }
+    80%,
+    100% {
+        opacity: 0.2;
+    }
+}
+.led {
+    animation: blink 1.4s ease-in-out infinite;
+    background-color: var(--green-bg);
+    display: inline-block;
+    border-radius: 9999px;
+}
+
+.h-green:hover {
+    color: var(--green-text);
+}
+.theme-toggle:hover {
+    background-color: var(--bg-2);
+}
+
+/* ── Hours (hard-coded, bulletproof) ── */
+.hours-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.hours-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+.hours-row .days {
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.hours-row .time {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 14px;
+    text-align: right;
+}
+.hours-row .note {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--mute);
+    margin-top: 3px;
+    display: block;
+}
+
+/* ── Nonstop tile hover (on dark bg) ── */
+.nonstop-tile {
+    transition: all 0.25s ease;
+    background-color: transparent;
+}
+.nonstop-tile:hover {
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+    border-color: var(--green-bg);
+}
+
+/* ── Big -30% with stroke (light mode) ── */
+.big-drop {
+    color: var(--green-bg);
+    font-family: "Archivo Black", sans-serif;
+}
+[data-theme="light"] .big-drop {
+    -webkit-text-stroke: 1.5px #131310;
+    text-shadow: 3px 3px 0 #131310;
+}
+
+[data-theme="light"] .stroke-soft {
+    -webkit-text-stroke: 0.5px #131310;
+}
