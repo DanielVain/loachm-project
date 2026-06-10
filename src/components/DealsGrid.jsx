@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import BoardCarousel from "./BoardCarousel.jsx";
+import DealCard from "./DealCard.jsx";
 
 /** "הלוח" — the board: filterable 2-row auto-scrolling carousel of deals. */
 export default function DealsGrid() {
@@ -34,6 +35,9 @@ export default function DealsGrid() {
     }, [deals, query, cat]);
 
     const hasFilter = query.trim() !== "" || cat !== "all";
+    // Up to 6 items fit a 3×2 grid perfectly; beyond that, switch to the
+    // 2-row auto-scroll carousel so the page doesn't grow taller.
+    const useCarousel = filtered.length > 6;
 
     return (
         <section id="deals" className="border-t border-b t-rule">
@@ -99,8 +103,14 @@ export default function DealsGrid() {
                             ? "אין פריטים בלוח כרגע."
                             : "לא נמצאו פריטים תואמים."}
                     </div>
-                ) : (
+                ) : useCarousel ? (
                     <BoardCarousel items={filtered} autoplay={!hasFilter} />
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {filtered.map((d) => (
+                            <DealCard key={d.id} deal={d} />
+                        ))}
+                    </div>
                 )}
 
                 <div className="mt-6 flex items-center justify-between gap-3 uppercase-mono t-mute">
@@ -108,9 +118,11 @@ export default function DealsGrid() {
                         {filtered.length} פריטים
                         {hasFilter ? ` (מתוך ${deals.length})` : ""}
                     </span>
-                    <span className="hidden md:inline">
-                        גוללים לצדדים · מרחפים כדי לעצור
-                    </span>
+                    {useCarousel && (
+                        <span className="hidden md:inline">
+                            גוללים לצדדים · מרחפים כדי לעצור
+                        </span>
+                    )}
                 </div>
 
                 <div className="mt-6 uppercase-mono t-mute text-center">
