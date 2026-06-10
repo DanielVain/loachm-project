@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Flame } from "lucide-react";
+import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
 import TrustBar from "./TrustBar.jsx";
@@ -49,6 +49,16 @@ export default function Hero() {
                                 {content.brand.accent}
                             </span>
                         </h1>
+
+                        <div className="mt-5 inline-flex items-center gap-2.5 font-heb text-xl md:text-2xl font-bold">
+                            <MapPin
+                                className="w-5 h-5 md:w-6 md:h-6 t-green flex-shrink-0"
+                                strokeWidth={2.2}
+                            />
+                            <span>
+                                {content.contact.addressHe}, {content.contact.city}
+                            </span>
+                        </div>
 
                         <p className="mt-6 md:mt-8 text-lg md:text-2xl max-w-2xl leading-snug">
                             משחקי מחשב וקונסולות, ציוד גיימינג, ומדף ה-

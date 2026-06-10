@@ -20,7 +20,9 @@ export default function Header({ dark, onToggleTheme }) {
                 <div className="flex items-center gap-2.5">
                     <Led px={8} />
                     <Brand size="text-xl md:text-2xl" />
-                    <span className="village-badge">וילג'</span>
+                    <span className="village-badge hidden sm:inline-block">
+                        {content.contact.addressHe}, {content.contact.city}
+                    </span>
                 </div>
 
                 <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">
