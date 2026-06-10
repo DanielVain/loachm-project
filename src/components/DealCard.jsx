@@ -1,5 +1,5 @@
 import { Flame, ArrowUpLeft } from "lucide-react";
-import { fmt, pct, iconFor } from "../data/content.js";
+import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
 import Led from "./Led.jsx";
 
 /** A single board item. Shows a product photo when one is set, otherwise
@@ -34,7 +34,15 @@ export default function DealCard({ deal }) {
             <div className="font-display text-2xl md:text-3xl mb-2 leading-tight">
                 {deal.name}
             </div>
-            <div className="font-mono text-xs t-mute mb-6">{deal.spec}</div>
+            {splitSpec(deal.spec).length > 0 && (
+                <div className="font-mono text-xs t-mute mb-6 deal-spec">
+                    {splitSpec(deal.spec).map((s, i) => (
+                        <span key={i} className="deal-spec-item">
+                            {s}
+                        </span>
+                    ))}
+                </div>
+            )}
 
             <div className="mt-auto">
                 <div className="flex items-baseline gap-2 mb-1">

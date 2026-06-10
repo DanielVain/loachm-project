@@ -120,7 +120,7 @@ export default function DealsGrid() {
                     </span>
                     {useCarousel && (
                         <span className="hidden md:inline">
-                            גוללים לצדדים · מרחפים כדי לעצור
+                            נע אוטומטית · אפשר לגלול · מרחפים לעצירה
                         </span>
                     )}
                 </div>

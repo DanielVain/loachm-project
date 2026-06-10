@@ -290,6 +290,43 @@ body {
     box-shadow: 0 0 32px rgba(56, 189, 248, 0.35);
 }
 
+/* ── Spec rendered as a middle-dot separated list ── */
+.deal-spec {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.deal-spec-item:not(:last-child)::after {
+    content: "·";
+    margin: 0 0.45em;
+    color: var(--green-bg);
+    opacity: 0.8;
+    font-weight: 700;
+}
+
+/* ── CMS spec list editor ── */
+.spec-bullet {
+    color: var(--green-bg);
+    font-weight: 700;
+    width: 0.8em;
+    text-align: center;
+    flex-shrink: 0;
+}
+.cms-add-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    align-self: flex-start;
+    border: 1px dashed var(--rule);
+    padding: 5px 10px;
+    color: var(--mute);
+    border-radius: 2px;
+}
+.cms-add-row:hover {
+    color: var(--text);
+    border-color: var(--green-bg);
+}
+
 /* ── Product photo on board cards ── */
 .deal-photo {
     aspect-ratio: 16 / 10;
@@ -352,28 +389,27 @@ body {
     background-color: var(--bg-2);
 }
 
-/* ── Board: 2-row horizontal auto-scroll carousel ── */
+/* ── Board: 2-row infinite auto-scroll (native scroll + JS) ── */
 .board-scroller {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--rule) transparent;
-    padding-bottom: 12px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* old Edge */
+    cursor: grab;
 }
 .board-scroller::-webkit-scrollbar {
-    height: 8px;
+    display: none; /* Chrome / Safari */
 }
-.board-scroller::-webkit-scrollbar-track {
-    background: transparent;
+.board-scroller.is-grabbing {
+    cursor: grabbing;
+    user-select: none;
 }
-.board-scroller::-webkit-scrollbar-thumb {
-    background: var(--rule);
-    border-radius: 9999px;
+.board-scroller.is-grabbing .board-grid {
+    pointer-events: none; /* don't trigger card clicks while dragging */
 }
-.board-loop {
+.board-track {
     display: flex;
-    gap: 16px;
     width: max-content;
 }
 .board-grid {
@@ -383,17 +419,16 @@ body {
     grid-auto-columns: 300px;
     gap: 16px;
     align-items: stretch;
+    margin-inline-end: 16px; /* trailing gap so the two copies are evenly spaced */
 }
 .board-grid > * {
     height: 100%;
 }
 @media (max-width: 640px) {
-    .board-loop {
-        gap: 12px;
-    }
     .board-grid {
         grid-auto-columns: 82vw;
         gap: 12px;
+        margin-inline-end: 12px;
     }
 }
 

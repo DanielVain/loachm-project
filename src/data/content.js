@@ -233,6 +233,20 @@ export const TRUST = [
     { icon: "Clock", title: "מוצאי שבת", desc: "שבת 20:00 – 23:00" },
 ];
 
+/* Spec helpers — `spec` is stored as a "·"-joined string but edited and
+   rendered as a list of individual items. */
+export const SPEC_SEP = " · ";
+export const splitSpec = (spec) =>
+    String(spec || "")
+        .split(/[·•]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+export const joinSpec = (arr) =>
+    (arr || [])
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .join(SPEC_SEP);
+
 /* Formatting helpers. */
 export const fmt = (n) => Number(n || 0).toLocaleString("en-US");
 export const pct = (was, now) =>

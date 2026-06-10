@@ -4,7 +4,13 @@ import { Plus, Trash2, ImagePlus, X, LogOut, Loader2 } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import { useAuth } from "../store/AuthContext.jsx";
 import { uploadProductImage } from "../store/supabase.js";
-import { ICON_CHOICES, iconFor, pct } from "../data/content.js";
+import {
+    ICON_CHOICES,
+    iconFor,
+    pct,
+    splitSpec,
+    joinSpec,
+} from "../data/content.js";
 import Brand from "../components/Brand.jsx";
 
 const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
@@ -22,6 +28,23 @@ function DealEditor({ deal, onChange, onRemove }) {
     const [imgError, setImgError] = useState("");
     const [uploading, setUploading] = useState(false);
     const Icon = iconFor(deal.icon);
+
+    // Spec edited as a list; persisted as a "·"-joined string.
+    const [specItems, setSpecItems] = useState(() => {
+        const arr = splitSpec(deal.spec);
+        return arr.length ? arr : [""];
+    });
+    const syncSpecs = (arr) => {
+        setSpecItems(arr);
+        onChange({ spec: joinSpec(arr) });
+    };
+    const setSpecAt = (i, v) =>
+        syncSpecs(specItems.map((x, j) => (j === i ? v : x)));
+    const removeSpec = (i) => {
+        const next = specItems.filter((_, j) => j !== i);
+        syncSpecs(next.length ? next : [""]);
+    };
+    const addSpec = () => setSpecItems([...specItems, ""]);
 
     async function onPickImage(e) {
         const file = e.target.files?.[0];
@@ -108,13 +131,43 @@ function DealEditor({ deal, onChange, onRemove }) {
                             ))}
                         </select>
                     </Field>
-                    <Field label="מפרט">
-                        <input
-                            className="cms-input"
-                            value={deal.spec}
-                            onChange={(e) => onChange({ spec: e.target.value })}
-                        />
-                    </Field>
+                    <div className="col-span-2 md:col-span-3 flex flex-col gap-1.5">
+                        <span className="uppercase-mono t-mute">מפרט</span>
+                        <div className="flex flex-col gap-2">
+                            {specItems.map((s, i) => (
+                                <div
+                                    key={i}
+                                    className="flex items-center gap-2"
+                                >
+                                    <span className="spec-bullet">·</span>
+                                    <input
+                                        className="cms-input flex-1"
+                                        value={s}
+                                        placeholder="תכונה (לדוגמה: אלחוטי)"
+                                        onChange={(e) =>
+                                            setSpecAt(i, e.target.value)
+                                        }
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSpec(i)}
+                                        aria-label="הסר תכונה"
+                                        className="t-mute h-green"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={addSpec}
+                                className="cms-add-row uppercase-mono"
+                            >
+                                <Plus className="w-3 h-3" strokeWidth={2.5} />
+                                הוסף תכונה
+                            </button>
+                        </div>
+                    </div>
                     <Field label="מחיר קודם (₪)">
                         <input
                             type="number"
