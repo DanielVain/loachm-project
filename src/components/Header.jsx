@@ -17,9 +17,10 @@ export default function Header({ dark, onToggleTheme }) {
     return (
         <header className="border-b t-rule t-bg">
             <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                     <Led px={8} />
                     <Brand size="text-xl md:text-2xl" />
+                    <span className="village-badge">וילג'</span>
                 </div>
 
                 <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">

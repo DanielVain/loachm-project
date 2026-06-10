@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Plus, Trash2, ImagePlus, X, LogOut, Loader2 } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
@@ -89,6 +89,8 @@ function DealEditor({ deal, onChange, onRemove }) {
                     <Field label="קטגוריה">
                         <input
                             className="cms-input"
+                            list="cms-categories"
+                            placeholder="לדוגמה: מקלדת"
                             value={deal.cat}
                             onChange={(e) => onChange({ cat: e.target.value })}
                         />
@@ -195,6 +197,16 @@ export default function AdminCMS() {
     const navigate = useNavigate();
     const [seeding, setSeeding] = useState(false);
 
+    // Existing categories, offered as autocomplete suggestions in each editor.
+    const categories = useMemo(() => {
+        const set = new Set();
+        content.deals.forEach((d) => {
+            const c = (d.cat || "").trim();
+            if (c) set.add(c);
+        });
+        return Array.from(set);
+    }, [content.deals]);
+
     async function onLogout() {
         await signOut();
         navigate("/admin");
@@ -235,6 +247,12 @@ export default function AdminCMS() {
             </header>
 
             <main className="max-w-[1100px] mx-auto px-5 py-8">
+                <datalist id="cms-categories">
+                    {categories.map((c) => (
+                        <option key={c} value={c} />
+                    ))}
+                </datalist>
+
                 <div className="flex items-center justify-between mb-6">
                     <div>
                         <h1 className="font-display text-2xl md:text-3xl">

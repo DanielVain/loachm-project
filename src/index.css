@@ -351,3 +351,99 @@ body {
 .cms-upload:hover {
     background-color: var(--bg-2);
 }
+
+/* ── Board: 2-row horizontal auto-scroll carousel ── */
+.board-scroller {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--rule) transparent;
+    padding-bottom: 12px;
+}
+.board-scroller::-webkit-scrollbar {
+    height: 8px;
+}
+.board-scroller::-webkit-scrollbar-track {
+    background: transparent;
+}
+.board-scroller::-webkit-scrollbar-thumb {
+    background: var(--rule);
+    border-radius: 9999px;
+}
+.board-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, auto);
+    grid-auto-columns: 300px;
+    gap: 16px 16px;
+    align-items: stretch;
+}
+.board-track > * {
+    height: 100%;
+}
+@media (max-width: 640px) {
+    .board-track {
+        grid-auto-columns: 82vw;
+        gap: 12px;
+    }
+}
+
+/* ── Search box + category chips ── */
+.board-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--rule);
+    background-color: var(--card);
+    padding: 8px 12px;
+    min-width: 240px;
+    border-radius: 2px;
+}
+.board-search:focus-within {
+    border-color: var(--green-bg);
+}
+.board-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: "Manrope", "Heebo", system-ui, sans-serif;
+}
+.cat-chip {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 6px 12px;
+    border: 1px solid var(--rule);
+    color: var(--mute);
+    background-color: var(--card);
+    border-radius: 9999px;
+    transition: all 0.18s ease;
+    cursor: pointer;
+}
+.cat-chip:hover {
+    color: var(--text);
+    border-color: var(--green-bg);
+}
+.cat-chip--active {
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+    border-color: var(--green-bg);
+}
+
+/* ── "וילג'" badge by the store name ── */
+.village-badge {
+    font-family: "Heebo", sans-serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.01em;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    color: #0a0a0a;
+    background-color: var(--green-bg);
+    white-space: nowrap;
+}
