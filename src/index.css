@@ -371,19 +371,27 @@ body {
     background: var(--rule);
     border-radius: 9999px;
 }
-.board-track {
+.board-loop {
+    display: flex;
+    gap: 16px;
+    width: max-content;
+}
+.board-grid {
     display: grid;
     grid-auto-flow: column;
     grid-template-rows: repeat(2, auto);
     grid-auto-columns: 300px;
-    gap: 16px 16px;
+    gap: 16px;
     align-items: stretch;
 }
-.board-track > * {
+.board-grid > * {
     height: 100%;
 }
 @media (max-width: 640px) {
-    .board-track {
+    .board-loop {
+        gap: 12px;
+    }
+    .board-grid {
         grid-auto-columns: 82vw;
         gap: 12px;
     }

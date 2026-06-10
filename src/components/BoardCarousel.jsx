@@ -1,52 +1,59 @@
 import { useEffect, useRef } from "react";
 import DealCard from "./DealCard.jsx";
 
-const SPEED = 0.5; // px per frame (~30px/s)
+const SPEED = 0.014; // px per millisecond (~14 px/s) — gentle drift
 
 /**
- * A 2-row horizontal strip of board items that auto-advances back and forth
- * (ping-pong) and pauses on hover/touch/focus. Natively scrollable too, so
- * users can swipe/drag through it. RTL-aware via the computed direction.
+ * A 2-row horizontal strip of board items that scrolls infinitely in one
+ * direction. The strip is rendered twice; once the scroll passes the first
+ * copy we jump back by exactly one copy's width, so the loop is seamless.
+ * Pauses on hover/touch/focus, and is natively scrollable (swipe/drag).
+ * RTL-aware via the computed direction.
  */
 export default function BoardCarousel({ items, autoplay = true }) {
-    const ref = useRef(null);
-    const dir = useRef(1); // +1 toward the end, -1 back toward the start
+    const scrollerRef = useRef(null);
+    const copyARef = useRef(null);
+    const copyBRef = useRef(null);
     const paused = useRef(false);
 
     useEffect(() => {
-        const el = ref.current;
-        if (!el) return;
+        const el = scrollerRef.current;
+        const a = copyARef.current;
+        const b = copyBRef.current;
+        if (!el || !a || !b) return;
 
-        // -1 in RTL (scrollLeft goes negative toward the end), +1 in LTR.
-        const sign =
-            getComputedStyle(el).direction === "rtl" ? -1 : 1;
-
+        const sign = getComputedStyle(el).direction === "rtl" ? -1 : 1;
         let raf;
-        const tick = () => {
+        let last = performance.now();
+
+        const tick = (now) => {
             raf = requestAnimationFrame(tick);
+            const dt = now - last;
+            last = now;
             if (!autoplay || paused.current) return;
+
+            // Distance between the two identical copies = one loop length.
+            const wrap = Math.abs(b.offsetLeft - a.offsetLeft);
             const max = el.scrollWidth - el.clientWidth;
-            if (max <= 1) return; // nothing to scroll
-            let p = sign * el.scrollLeft + dir.current * SPEED; // normalized 0..max
-            if (p >= max) {
-                p = max;
-                dir.current = -1;
-            } else if (p <= 0) {
-                p = 0;
-                dir.current = 1;
-            }
+            if (wrap <= 1 || max <= wrap) return; // not enough to loop cleanly
+
+            let p = sign * el.scrollLeft + SPEED * dt; // advance forward
+            if (p >= wrap) p -= wrap; // seamless wrap
             el.scrollLeft = sign * p;
         };
+
         raf = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(raf);
     }, [autoplay, items.length]);
 
     const pause = () => (paused.current = true);
-    const resume = () => (paused.current = false);
+    const resume = () => {
+        paused.current = false;
+    };
 
     return (
         <div
-            ref={ref}
+            ref={scrollerRef}
             className="board-scroller"
             onMouseEnter={pause}
             onMouseLeave={resume}
@@ -55,10 +62,17 @@ export default function BoardCarousel({ items, autoplay = true }) {
             onFocusCapture={pause}
             onBlurCapture={resume}
         >
-            <div className="board-track">
-                {items.map((d) => (
-                    <DealCard key={d.id} deal={d} />
-                ))}
+            <div className="board-loop">
+                <div className="board-grid" ref={copyARef}>
+                    {items.map((d) => (
+                        <DealCard key={d.id} deal={d} />
+                    ))}
+                </div>
+                <div className="board-grid" ref={copyBRef} aria-hidden="true">
+                    {items.map((d) => (
+                        <DealCard key={d.id + "-dup"} deal={d} />
+                    ))}
+                </div>
             </div>
         </div>
     );
