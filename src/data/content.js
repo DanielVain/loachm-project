@@ -98,6 +98,26 @@ export const ICON_LABELS_HE = {
 };
 export const iconLabel = (name) => ICON_LABELS_HE[name] || name;
 
+/** Icons sorted by Hebrew label and grouped by first letter, for the picker. */
+export const ICON_GROUPS = (() => {
+    const items = ICON_CHOICES.map((key) => ({
+        key,
+        label: iconLabel(key),
+    })).sort((a, b) => a.label.localeCompare(b.label, "he"));
+
+    const groups = [];
+    let current = null;
+    for (const it of items) {
+        const letter = it.label[0];
+        if (!current || current.letter !== letter) {
+            current = { letter, items: [] };
+            groups.push(current);
+        }
+        current.items.push(it);
+    }
+    return groups;
+})();
+
 /** Resolve a string icon name to a component, with a safe fallback. */
 export const iconFor = (name) => ICON_MAP[name] || ShoppingBag;
 

@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { ICON_CHOICES, iconFor, iconLabel } from "../data/content.js";
+import { ICON_GROUPS, iconFor } from "../data/content.js";
 
 /* ── Small building blocks ─────────────────────────────────────── */
 
@@ -43,10 +43,14 @@ function IconSelect({ label, value, onChange }) {
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                 >
-                    {ICON_CHOICES.map((n) => (
-                        <option key={n} value={n}>
-                            {iconLabel(n)}
-                        </option>
+                    {ICON_GROUPS.map((g) => (
+                        <optgroup key={g.letter} label={g.letter}>
+                            {g.items.map((it) => (
+                                <option key={it.key} value={it.key}>
+                                    {it.label}
+                                </option>
+                            ))}
+                        </optgroup>
                     ))}
                 </select>
                 <span className="icon-preview" title={value}>

@@ -5,12 +5,11 @@ import { useContent } from "../store/ContentContext.jsx";
 import { useAuth } from "../store/AuthContext.jsx";
 import { uploadProductImage } from "../store/supabase.js";
 import {
-    ICON_CHOICES,
     iconFor,
     pct,
     splitSpec,
     joinSpec,
-    iconLabel,
+    ICON_GROUPS,
 } from "../data/content.js";
 import Brand from "../components/Brand.jsx";
 import SiteEditor from "./SiteEditor.jsx";
@@ -130,10 +129,14 @@ function DealEditor({ deal, onChange, onRemove }) {
                                     onChange({ icon: e.target.value })
                                 }
                             >
-                                {ICON_CHOICES.map((name) => (
-                                    <option key={name} value={name}>
-                                        {iconLabel(name)}
-                                    </option>
+                                {ICON_GROUPS.map((g) => (
+                                    <optgroup key={g.letter} label={g.letter}>
+                                        {g.items.map((it) => (
+                                            <option key={it.key} value={it.key}>
+                                                {it.label}
+                                            </option>
+                                        ))}
+                                    </optgroup>
                                 ))}
                             </select>
                             <span className="icon-preview" title={deal.icon}>
