@@ -66,6 +66,38 @@ export const ICON_MAP = {
 /** Icon names exposed in the CMS picker. */
 export const ICON_CHOICES = Object.keys(ICON_MAP);
 
+/** Hebrew display labels for the icon picker (value stays the English key). */
+export const ICON_LABELS_HE = {
+    Phone: "טלפון",
+    MapPin: "מיקום",
+    Clock: "שעון",
+    Zap: "חשמל",
+    Shield: "אחריות / מגן",
+    ShoppingBag: "קניות",
+    Smartphone: "סמארטפון",
+    Keyboard: "מקלדת",
+    Mouse: "עכבר",
+    Headphones: "אוזניות",
+    Bluetooth: "בלוטות'",
+    Speaker: "רמקול",
+    Flame: "חם / אש",
+    Sparkles: "מבצע / נצנוץ",
+    Boxes: "אספנות",
+    Mic2: "מיקרופון",
+    Cable: "כבל",
+    Plug: "מטען / תקע",
+    BatteryCharging: "סוללה",
+    Monitor: "מסך",
+    Gamepad2: "בקר משחק",
+    Watch: "שעון יד",
+    Camera: "מצלמה",
+    Tv: "טלוויזיה",
+    HardDrive: "כונן",
+    Cpu: "מעבד",
+    Tablet: "טאבלט",
+};
+export const iconLabel = (name) => ICON_LABELS_HE[name] || name;
+
 /** Resolve a string icon name to a component, with a safe fallback. */
 export const iconFor = (name) => ICON_MAP[name] || ShoppingBag;
 

@@ -10,6 +10,7 @@ import {
     pct,
     splitSpec,
     joinSpec,
+    iconLabel,
 } from "../data/content.js";
 import Brand from "../components/Brand.jsx";
 import SiteEditor from "./SiteEditor.jsx";
@@ -131,7 +132,7 @@ function DealEditor({ deal, onChange, onRemove }) {
                             >
                                 {ICON_CHOICES.map((name) => (
                                     <option key={name} value={name}>
-                                        {name}
+                                        {iconLabel(name)}
                                     </option>
                                 ))}
                             </select>

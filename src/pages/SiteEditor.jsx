@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { ICON_CHOICES, iconFor } from "../data/content.js";
+import { ICON_CHOICES, iconFor, iconLabel } from "../data/content.js";
 
 /* ── Small building blocks ─────────────────────────────────────── */
 
@@ -45,7 +45,7 @@ function IconSelect({ label, value, onChange }) {
                 >
                     {ICON_CHOICES.map((n) => (
                         <option key={n} value={n}>
-                            {n}
+                            {iconLabel(n)}
                         </option>
                     ))}
                 </select>
