@@ -10,57 +10,72 @@ const NAV = [
     { href: "#visit", label: "איך מגיעים" },
 ];
 
-/** Top bar: brand, anchor nav, theme toggle and a one-tap call button. */
+/** Sticky top bar: brand, nav (desktop inline + mobile row), theme + call. */
 export default function Header({ dark, onToggleTheme }) {
     const { content } = useContent();
 
     return (
-        <header className="border-b t-rule t-bg">
-            <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-4 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                    <Led px={8} />
-                    <Brand size="text-xl md:text-2xl" />
-                    <span className="village-badge hidden sm:inline-block">
-                        {content.contact.addressHe}, {content.contact.city}
-                    </span>
+        <header className="site-header sticky top-0 z-40 border-b t-rule t-bg">
+            <div className="max-w-[1280px] mx-auto px-5 md:px-8">
+                <div className="py-4 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        <Led px={8} />
+                        <Brand size="text-xl md:text-2xl" />
+                        <span className="village-badge hidden sm:inline-block">
+                            {content.contact.addressHe}, {content.contact.city}
+                        </span>
+                    </div>
+
+                    <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">
+                        {NAV.map((n) => (
+                            <a
+                                key={n.href}
+                                href={n.href}
+                                className="h-green transition-colors"
+                            >
+                                {n.label}
+                            </a>
+                        ))}
+                    </nav>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        <button
+                            onClick={onToggleTheme}
+                            className="theme-toggle w-9 h-9 border t-rule flex items-center justify-center"
+                            aria-label="החלפת מצב תצוגה"
+                        >
+                            {dark ? (
+                                <Sun className="w-3.5 h-3.5" />
+                            ) : (
+                                <Moon className="w-3.5 h-3.5" />
+                            )}
+                        </button>
+                        <a
+                            href={`tel:${content.contact.phoneTel}`}
+                            className="t-green-bg px-4 md:px-5 py-2.5 font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity"
+                            style={{ color: "#0a0a0a" }}
+                        >
+                            <Phone className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">
+                                {content.contact.phone}
+                            </span>
+                            <span className="sm:hidden">חיוג</span>
+                        </a>
+                    </div>
                 </div>
 
-                <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">
+                {/* Mobile nav row — always visible, scrolls horizontally if needed. */}
+                <nav className="site-nav-mobile md:hidden flex items-center gap-5 overflow-x-auto pb-3 -mt-1 uppercase-mono t-mute">
                     {NAV.map((n) => (
                         <a
                             key={n.href}
                             href={n.href}
-                            className="h-green transition-colors"
+                            className="h-green transition-colors whitespace-nowrap"
                         >
                             {n.label}
                         </a>
                     ))}
                 </nav>
-
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={onToggleTheme}
-                        className="theme-toggle w-9 h-9 border t-rule flex items-center justify-center"
-                        aria-label="החלפת מצב תצוגה"
-                    >
-                        {dark ? (
-                            <Sun className="w-3.5 h-3.5" />
-                        ) : (
-                            <Moon className="w-3.5 h-3.5" />
-                        )}
-                    </button>
-                    <a
-                        href={`tel:${content.contact.phoneTel}`}
-                        className="t-green-bg px-4 md:px-5 py-2.5 font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity"
-                        style={{ color: "#0a0a0a" }}
-                    >
-                        <Phone className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">
-                            {content.contact.phone}
-                        </span>
-                        <span className="sm:hidden">חיוג</span>
-                    </a>
-                </div>
             </div>
         </header>
     );

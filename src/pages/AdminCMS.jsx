@@ -277,51 +277,55 @@ export default function AdminCMS() {
     return (
         <div className="admin-shell min-h-screen">
             <header className="border-b t-rule t-bg sticky top-0 z-20">
-                <div className="max-w-[1100px] mx-auto px-5 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <Brand size="text-xl" />
-                        <span className="uppercase-mono t-mute">/ ניהול</span>
+                <div className="max-w-[1100px] mx-auto px-5">
+                    <div className="py-4 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <Brand size="text-xl" />
+                            <span className="uppercase-mono t-mute">
+                                / ניהול
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Link
+                                to="/"
+                                className="uppercase-mono border t-rule px-3 py-2 h-green transition-colors"
+                            >
+                                צפייה באתר ↗
+                            </Link>
+                            <button
+                                onClick={onLogout}
+                                className="uppercase-mono border t-rule px-3 py-2 flex items-center gap-1.5"
+                            >
+                                <LogOut className="w-3.5 h-3.5" />
+                                יציאה
+                            </button>
+                        </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Link
-                            to="/"
-                            className="uppercase-mono border t-rule px-3 py-2 h-green transition-colors"
-                        >
-                            צפייה באתר ↗
-                        </Link>
+
+                    <div className="board-cats flex flex-wrap gap-2 pb-3">
                         <button
-                            onClick={onLogout}
-                            className="uppercase-mono border t-rule px-3 py-2 flex items-center gap-1.5"
+                            onClick={() => setTab("board")}
+                            className={`cat-chip ${tab === "board" ? "cat-chip--active" : ""}`}
                         >
-                            <LogOut className="w-3.5 h-3.5" />
-                            יציאה
+                            הלוח
+                        </button>
+                        <button
+                            onClick={() => setTab("site")}
+                            className={`cat-chip ${tab === "site" ? "cat-chip--active" : ""}`}
+                        >
+                            תוכן האתר
+                        </button>
+                        <button
+                            onClick={() => setTab("repairs")}
+                            className={`cat-chip ${tab === "repairs" ? "cat-chip--active" : ""}`}
+                        >
+                            תיקונים
                         </button>
                     </div>
                 </div>
             </header>
 
             <main className="max-w-[1100px] mx-auto px-5 py-8">
-                <div className="flex flex-wrap gap-2 mb-8">
-                    <button
-                        onClick={() => setTab("board")}
-                        className={`cat-chip ${tab === "board" ? "cat-chip--active" : ""}`}
-                    >
-                        הלוח
-                    </button>
-                    <button
-                        onClick={() => setTab("site")}
-                        className={`cat-chip ${tab === "site" ? "cat-chip--active" : ""}`}
-                    >
-                        תוכן האתר
-                    </button>
-                    <button
-                        onClick={() => setTab("repairs")}
-                        className={`cat-chip ${tab === "repairs" ? "cat-chip--active" : ""}`}
-                    >
-                        תיקונים
-                    </button>
-                </div>
-
                 {tab === "site" && <SiteEditor />}
                 {tab === "repairs" && <RepairsEditor />}
 

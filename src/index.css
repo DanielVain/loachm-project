@@ -4,6 +4,34 @@
    viewport. All rem-based sizes (text + spacing) follow this automatically. */
 html {
     font-size: clamp(16.5px, 14.5px + 0.55vw, 19px);
+    scroll-behavior: smooth;
+}
+
+/* Anchor targets clear the sticky header when jumped to. */
+#nonstop,
+#deals,
+#extras,
+#visit {
+    scroll-margin-top: 84px;
+}
+@media (max-width: 767px) {
+    #nonstop,
+    #deals,
+    #extras,
+    #visit {
+        scroll-margin-top: 116px;
+    }
+}
+
+/* Sticky site header. */
+.site-header {
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+.site-nav-mobile {
+    scrollbar-width: none;
+}
+.site-nav-mobile::-webkit-scrollbar {
+    display: none;
 }
 
 [data-theme="light"] {
