@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { ICON_OPTIONS, iconFor } from "../data/content.js";
+import { ICON_OPTIONS, iconFor, WEEKDAYS_HE } from "../data/content.js";
 
 /* ── Small building blocks ─────────────────────────────────────── */
 
@@ -70,7 +70,12 @@ function Card({ title, children }) {
 
 export default function SiteEditor() {
     const { content, updateSite } = useContent();
-    const { ui, featured, ticker, extras, weeklyDrop } = content;
+    const { ui, featured, ticker, extras, weeklyDrop, hours } = content;
+
+    const setHour = (i, patch) =>
+        updateSite({
+            hours: hours.map((h, j) => (j === i ? { ...h, ...patch } : h)),
+        });
 
     const setUi = (key, val) => updateSite({ ui: { ...ui, [key]: val } });
     const setWeekly = (key, val) =>
@@ -168,6 +173,76 @@ export default function SiteEditor() {
                         onChange={(v) => setWeekly("endsValue", v)}
                     />
                 </div>
+            </Card>
+
+            {/* ── Opening hours ── */}
+            <Card title="שעות פתיחה">
+                <div className="flex flex-col gap-1">
+                    {WEEKDAYS_HE.map((label, i) => {
+                        const h = hours[i] || {};
+                        return (
+                            <div
+                                key={i}
+                                className="flex flex-wrap items-center gap-2 border-t t-rule-soft py-2 first:border-t-0"
+                            >
+                                <span
+                                    className="font-bold text-sm"
+                                    style={{ width: 68 }}
+                                >
+                                    {i === 6 ? "שבת" : "יום " + label}
+                                </span>
+                                <input
+                                    type="time"
+                                    dir="ltr"
+                                    className="cms-input"
+                                    style={{ width: 118 }}
+                                    value={h.open || ""}
+                                    disabled={!!h.closed}
+                                    onChange={(e) =>
+                                        setHour(i, { open: e.target.value })
+                                    }
+                                />
+                                <span className="t-mute">–</span>
+                                <input
+                                    type="time"
+                                    dir="ltr"
+                                    className="cms-input"
+                                    style={{ width: 118 }}
+                                    value={h.close || ""}
+                                    disabled={!!h.closed}
+                                    onChange={(e) =>
+                                        setHour(i, { close: e.target.value })
+                                    }
+                                />
+                                <input
+                                    className="cms-input"
+                                    style={{ width: 130 }}
+                                    placeholder="הערה"
+                                    value={h.note || ""}
+                                    onChange={(e) =>
+                                        setHour(i, { note: e.target.value })
+                                    }
+                                />
+                                <label className="flex items-center gap-1.5 text-sm t-mute cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={!!h.closed}
+                                        onChange={(e) =>
+                                            setHour(i, {
+                                                closed: e.target.checked,
+                                            })
+                                        }
+                                    />
+                                    סגור
+                                </label>
+                            </div>
+                        );
+                    })}
+                </div>
+                <p className="uppercase-mono t-mute">
+                    ימים עם שעות זהות מתאחדים אוטומטית בתצוגה · השעות מזינות גם את
+                    תגית "פתוח / סגור".
+                </p>
             </Card>
 
             {/* ── NONSTOP feature ── */}
@@ -338,8 +413,8 @@ export default function SiteEditor() {
             </Card>
 
             <p className="uppercase-mono t-mute">
-                השינויים נשמרים בענן ומופיעים מיד באתר · ההירו, הטלפונים ושעות
-                הפתיחה נשארים קבועים.
+                השינויים נשמרים בענן ומופיעים מיד באתר · ההירו והטלפונים נשארים
+                קבועים.
             </p>
         </div>
     );

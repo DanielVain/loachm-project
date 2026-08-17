@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 import { storeStatus } from "../data/content.js";
+import { useContent } from "../store/ContentContext.jsx";
 
-/** Live "פתוח עכשיו / סגור" badge, re-evaluated every 30s in Israel time. */
+/** Live "פתוח / סגור" badge, re-evaluated every 30s in Israel time. */
 export default function OpenStatus({ className = "", showDetail = true }) {
-    const [status, setStatus] = useState(() => storeStatus());
+    const { content } = useContent();
+    const hours = content.hours;
+    const [status, setStatus] = useState(() => storeStatus(hours));
 
     useEffect(() => {
-        const tick = () => setStatus(storeStatus());
+        const tick = () => setStatus(storeStatus(hours));
         tick();
         const id = setInterval(tick, 30000);
         return () => clearInterval(id);
-    }, []);
+    }, [hours]);
 
     const detail = status.open
         ? status.closesLabel

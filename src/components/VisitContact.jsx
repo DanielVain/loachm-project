@@ -1,5 +1,6 @@
 import { Phone, MapPin, Clock, Zap, Navigation, Map } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
+import { groupedHours } from "../data/content.js";
 import Led from "./Led.jsx";
 import Brand from "./Brand.jsx";
 import OpenStatus from "./OpenStatus.jsx";
@@ -101,7 +102,7 @@ export default function VisitContact() {
                             <OpenStatus />
                         </div>
                         <div className="hours-list">
-                            {content.hours.map((h) => (
+                            {groupedHours(content.hours).map((h) => (
                                 <div key={h.days} className="hours-row">
                                     <span className="days">{h.days}</span>
                                     <span className="time">

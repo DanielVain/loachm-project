@@ -136,6 +136,7 @@ export function ContentProvider({ children }) {
             featured: { ...DEFAULT_CONTENT.featured, ...(site.featured || {}) },
             ticker: site.ticker ?? DEFAULT_CONTENT.ticker,
             extras: site.extras ?? DEFAULT_CONTENT.extras,
+            hours: Array.isArray(site.hours) ? site.hours : DEFAULT_CONTENT.hours,
             deals: deals || [],
         }),
         [site, deals],

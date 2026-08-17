@@ -127,11 +127,17 @@ export const DEFAULT_CONTENT = {
         city: "חדרה",
         landmark: "משחקי מחשב וקונסולות",
     },
+    // Opening hours — one entry per weekday (index 0 = Sunday … 6 = Saturday).
+    // Editable in the CMS; drives BOTH the displayed hours list and the live
+    // "פתוח / סגור" badge. Use { closed: true } for a day off.
     hours: [
-        { days: "ראשון – רביעי", time: "09:30 – 21:30" },
-        { days: "יום חמישי", time: "09:30 – 22:00" },
-        { days: "יום שישי", time: "09:00 – 15:30" },
-        { days: "שבת", time: "20:00 – 23:00", note: "מוצאי שבת" },
+        { open: "09:30", close: "21:30" }, // ראשון
+        { open: "09:30", close: "21:30" }, // שני
+        { open: "09:30", close: "21:30" }, // שלישי
+        { open: "09:30", close: "21:30" }, // רביעי
+        { open: "09:30", close: "22:00" }, // חמישי
+        { open: "09:00", close: "15:30" }, // שישי
+        { open: "20:00", close: "23:00", note: "מוצאי שבת" }, // שבת
     ],
     ticker: [
         "מבצעים עכשיו",
@@ -315,23 +321,20 @@ export const newId = () =>
     "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 /* ───────────────────────────────────────────────────────────────
-   Opening-hours logic — powers the live "פתוח עכשיו / סגור" badge.
-
-   OPEN_HOURS mirrors the human-readable `hours` above as machine
-   ranges, keyed by JS weekday (0 = Sunday … 6 = Saturday), each an
-   array of [openMinute, closeMinute] windows (minutes from midnight).
-   Kept here (static) because opening hours are a fixed feature.
+   Opening-hours logic — shared by the displayed hours list and the
+   live "פתוח / סגור" badge. Both derive from content.hours: one
+   { open, close, closed?, note? } entry per weekday (Sunday → Saturday),
+   so editing the hours in the CMS updates the badge automatically.
    ─────────────────────────────────────────────────────────────── */
-const M = (h, m = 0) => h * 60 + m;
-export const OPEN_HOURS = {
-    0: [[M(9, 30), M(21, 30)]], // ראשון
-    1: [[M(9, 30), M(21, 30)]], // שני
-    2: [[M(9, 30), M(21, 30)]], // שלישי
-    3: [[M(9, 30), M(21, 30)]], // רביעי
-    4: [[M(9, 30), M(22, 0)]], // חמישי
-    5: [[M(9, 0), M(15, 30)]], // שישי
-    6: [[M(20, 0), M(23, 0)]], // מוצאי שבת
-};
+export const WEEKDAYS_HE = [
+    "ראשון",
+    "שני",
+    "שלישי",
+    "רביעי",
+    "חמישי",
+    "שישי",
+    "שבת",
+];
 
 export const HE_DAYS = [
     "יום ראשון",
@@ -343,10 +346,27 @@ export const HE_DAYS = [
     "שבת",
 ];
 
+/** "HH:MM" → minutes from midnight, or null if unparseable. */
+export const parseHM = (s) => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || "").trim());
+    if (!m) return null;
+    const mins = Number(m[1]) * 60 + Number(m[2]);
+    return mins >= 0 && mins < 24 * 60 ? mins : null;
+};
+
 const fromMinutes = (mins) =>
     `${String(Math.floor(mins / 60) % 24).padStart(2, "0")}:${String(
         mins % 60,
     ).padStart(2, "0")}`;
+
+/** Open ranges [[start,end]] (minutes) for a weekday entry — empty if closed. */
+const dayRanges = (h) => {
+    if (!h || h.closed) return [];
+    const o = parseHM(h.open);
+    const c = parseHM(h.close);
+    if (o == null || c == null || c <= o) return [];
+    return [[o, c]];
+};
 
 /** Current weekday + minutes-from-midnight in a given timezone. */
 function nowInTZ(tz = "Asia/Jerusalem", date = new Date()) {
@@ -367,13 +387,40 @@ function nowInTZ(tz = "Asia/Jerusalem", date = new Date()) {
 }
 
 /**
- * Live open/closed status for the store, evaluated in Israel time.
+ * Collapse the 7-day hours into display rows, merging consecutive days that
+ * share identical hours (e.g. "ראשון – רביעי · 09:30 – 21:30").
+ */
+export function groupedHours(hours) {
+    const list = Array.isArray(hours) ? hours : DEFAULT_CONTENT.hours;
+    const dayName = (i, single) =>
+        i === 6 ? "שבת" : (single ? "יום " : "") + WEEKDAYS_HE[i];
+    const key = (h) =>
+        h?.closed ? "closed" : `${h?.open}|${h?.close}|${h?.note || ""}`;
+    const rows = [];
+    let i = 0;
+    while (i < 7) {
+        let j = i;
+        while (j + 1 < 7 && key(list[j + 1]) === key(list[i])) j++;
+        const h = list[i] || {};
+        rows.push({
+            days: i === j ? dayName(i, true) : `${dayName(i)} – ${dayName(j)}`,
+            time: h.closed ? "סגור" : `${h.open} – ${h.close}`,
+            note: h.note || "",
+        });
+        i = j + 1;
+    }
+    return rows;
+}
+
+/**
+ * Live open/closed status, evaluated in Israel time against `hours`.
  * Returns { open, closesLabel } when open, or
  * { open:false, opensLabel, opensWhen } with the next opening.
  */
-export function storeStatus(date = new Date()) {
+export function storeStatus(hours, date = new Date()) {
+    const list = Array.isArray(hours) ? hours : DEFAULT_CONTENT.hours;
     const { day, minutes } = nowInTZ("Asia/Jerusalem", date);
-    const today = OPEN_HOURS[day] || [];
+    const today = dayRanges(list[day]);
 
     for (const [start, end] of today) {
         if (minutes >= start && minutes < end) {
@@ -393,8 +440,8 @@ export function storeStatus(date = new Date()) {
     // Scan forward for the next day that has any hours.
     for (let i = 1; i <= 7; i++) {
         const d = (day + i) % 7;
-        const ranges = OPEN_HOURS[d];
-        if (ranges && ranges.length) {
+        const ranges = dayRanges(list[d]);
+        if (ranges.length) {
             return {
                 open: false,
                 opensWhen: i === 1 ? "מחר" : HE_DAYS[d],
