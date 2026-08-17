@@ -21,9 +21,13 @@ export default function BoardCarousel({ items, autoplay = true }) {
     const [grabbing, setGrabbing] = useState(false);
 
     // Drag bookkeeping.
-    const dragging = useRef(false);
+    const dragging = useRef(false); // true once movement passes the threshold
+    const pending = useRef(false); // mouse is down, not yet a drag
+    const didDrag = useRef(false); // a real drag happened → swallow the click
     const dragStartX = useRef(0);
     const dragStartScroll = useRef(0);
+    const pointerId = useRef(null);
+    const DRAG_THRESHOLD = 5; // px before a press becomes a drag (vs. a click)
 
     const copyWidth = () => {
         const copy = copyRef.current;
@@ -87,25 +91,44 @@ export default function BoardCarousel({ items, autoplay = true }) {
     }, [autoplay, items.length, copies]);
 
     // ── Drag-to-move (mouse only; touch uses native scrolling) ──
+    // A press only becomes a drag after the pointer moves past a threshold, so a
+    // plain click still reaches the card (and opens its detail lightbox).
     const onPointerDown = (e) => {
         if (e.pointerType !== "mouse") return;
-        const el = scrollerRef.current;
-        dragging.current = true;
-        setGrabbing(true);
+        pending.current = true;
+        didDrag.current = false;
         dragStartX.current = e.clientX;
-        dragStartScroll.current = el.scrollLeft;
-        el.setPointerCapture?.(e.pointerId);
+        dragStartScroll.current = scrollerRef.current.scrollLeft;
+        pointerId.current = e.pointerId;
     };
     const onPointerMove = (e) => {
-        if (!dragging.current) return;
+        if (!pending.current) return;
         const el = scrollerRef.current;
-        el.scrollLeft = dragStartScroll.current - (e.clientX - dragStartX.current);
+        const dx = e.clientX - dragStartX.current;
+        if (!dragging.current) {
+            if (Math.abs(dx) < DRAG_THRESHOLD) return; // still a potential click
+            dragging.current = true;
+            didDrag.current = true;
+            setGrabbing(true);
+            el.setPointerCapture?.(e.pointerId);
+        }
+        el.scrollLeft = dragStartScroll.current - dx;
     };
     const endDrag = (e) => {
+        pending.current = false;
         if (!dragging.current) return;
         dragging.current = false;
         setGrabbing(false);
         scrollerRef.current?.releasePointerCapture?.(e.pointerId);
+    };
+    // If a drag just happened, cancel the click it would otherwise fire so the
+    // lightbox doesn't pop open at the end of a drag.
+    const onClickCapture = (e) => {
+        if (didDrag.current) {
+            e.stopPropagation();
+            e.preventDefault();
+            didDrag.current = false;
+        }
     };
 
     const pause = () => (paused.current = true);
@@ -125,6 +148,7 @@ export default function BoardCarousel({ items, autoplay = true }) {
             onPointerMove={onPointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
+            onClickCapture={onClickCapture}
         >
             <div className="board-track">
                 {Array.from({ length: copies }).map((_, ci) => (

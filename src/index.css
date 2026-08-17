@@ -23,8 +23,22 @@ html {
     #deals,
     #extras,
     #visit {
-        scroll-margin-top: 116px;
+        scroll-margin-top: 76px;
     }
+}
+
+/* Mobile collapsible menu links. */
+.mobile-menu-link {
+    font-family: "JetBrains Mono", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.8rem;
+    color: var(--mute);
+    padding: 11px 4px;
+    border-bottom: 1px solid var(--rule-soft);
+}
+.mobile-menu-link:last-child {
+    border-bottom: none;
 }
 
 /* Sticky site header. */
