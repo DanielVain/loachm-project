@@ -28,20 +28,25 @@ export default function DealCard({ deal }) {
 
             <div className="flex items-start justify-between mb-6">
                 {deal.cat ? (
-                    <span className="deal-cat">{deal.cat}</span>
+                    <span className="deal-cat" dir="auto">
+                        {deal.cat}
+                    </span>
                 ) : (
                     <span />
                 )}
                 <Icon className="deal-icon t-mute w-7 h-7" strokeWidth={1.3} />
             </div>
 
-            <div className="font-display text-2xl md:text-3xl mb-2 leading-tight">
+            <div
+                className="font-display text-2xl md:text-3xl mb-2 leading-tight"
+                dir="auto"
+            >
                 {deal.name}
             </div>
             {splitSpec(deal.spec).length > 0 && (
                 <div className="font-mono text-xs t-mute mb-6 deal-spec">
                     {splitSpec(deal.spec).map((s, i) => (
-                        <span key={i} className="deal-spec-item">
+                        <span key={i} className="deal-spec-item" dir="auto">
                             {s}
                         </span>
                     ))}

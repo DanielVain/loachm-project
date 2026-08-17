@@ -40,10 +40,16 @@ export default function ExtrasGrid() {
                                     />
                                 </div>
                                 <div className="flex-1">
-                                    <div className="font-display text-lg md:text-xl mb-1">
+                                    <div
+                                        className="font-display text-lg md:text-xl mb-1"
+                                        dir="auto"
+                                    >
                                         {e.name}
                                     </div>
-                                    <div className="text-xs t-mute mb-2 leading-relaxed">
+                                    <div
+                                        className="text-xs t-mute mb-2 leading-relaxed"
+                                        dir="auto"
+                                    >
                                         {e.desc}
                                     </div>
                                     <div className="uppercase-mono t-green">

@@ -402,6 +402,8 @@ body {
     font-size: 0.9rem;
     font-family: "Manrope", "Heebo", system-ui, sans-serif;
     border-radius: 2px;
+    unicode-bidi: plaintext; /* auto-detect direction of mixed Heb/Lat content */
+    text-align: start;
 }
 .cms-input:focus {
     outline: 2px solid var(--green-bg);

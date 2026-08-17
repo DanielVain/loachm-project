@@ -79,7 +79,10 @@ export default function NonstopFeature() {
                                         />
                                     )}
                                 </div>
-                                <div className="font-display text-base md:text-lg leading-tight mb-3">
+                                <div
+                                    className="font-display text-base md:text-lg leading-tight mb-3"
+                                    dir="auto"
+                                >
                                     {item.name}
                                 </div>
                                 <div className="flex items-baseline gap-2">
