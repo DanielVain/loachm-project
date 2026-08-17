@@ -39,38 +39,61 @@ async function fetchDeals() {
     return data;
 }
 
+async function fetchSite() {
+    const { data, error } = await supabase
+        .from("site_content")
+        .select("data")
+        .eq("id", "main")
+        .maybeSingle();
+    if (error) {
+        console.warn("Could not load site content:", error.message);
+        return null;
+    }
+    return data?.data ?? {};
+}
+
 export function ContentProvider({ children }) {
     // null = loading; [] = loaded-empty; array = loaded
     const [deals, setDeals] = useState(null);
+    // Editable site-content overrides (merged over DEFAULT_CONTENT).
+    const [site, setSite] = useState({});
 
-    // Latest deals for use inside debounced callbacks.
+    // Latest values for use inside debounced callbacks.
     const dealsRef = useRef([]);
     useEffect(() => {
         dealsRef.current = deals || [];
     }, [deals]);
+    const siteRef = useRef({});
+    useEffect(() => {
+        siteRef.current = site;
+    }, [site]);
 
-    // Per-row debounce timers + the set of rows with unsaved local edits.
+    // Debounce timers + "actively editing" guards.
     const timersRef = useRef({});
     const dirtyRef = useRef(new Set());
+    const siteTimer = useRef(null);
+    const siteDirty = useRef(false);
 
-    // Initial load + realtime sync (so every visitor's board updates live).
+    // Initial load + realtime sync (so every visitor updates live).
     useEffect(() => {
         let active = true;
 
         fetchDeals().then((d) => {
             if (!active) return;
-            setDeals(d ?? DEFAULT_CONTENT.deals); // fall back to seed if offline
+            setDeals(d ?? DEFAULT_CONTENT.deals);
+        });
+        fetchSite().then((s) => {
+            if (active && s) setSite(s);
         });
 
         const channel = supabase
-            .channel("public:deals")
+            .channel("public:content")
             .on(
                 "postgres_changes",
                 { event: "*", schema: "public", table: "deals" },
                 async () => {
                     const fresh = await fetchDeals();
                     if (!active || !fresh) return;
-                    // Don't clobber rows the admin is actively editing.
                     setDeals((prev) => {
                         const localById = new Map(
                             (prev || []).map((d) => [d.id, d]),
@@ -83,6 +106,15 @@ export function ContentProvider({ children }) {
                     });
                 },
             )
+            .on(
+                "postgres_changes",
+                { event: "*", schema: "public", table: "site_content" },
+                async () => {
+                    if (siteDirty.current) return; // don't clobber active edits
+                    const s = await fetchSite();
+                    if (active && s) setSite(s);
+                },
+            )
             .subscribe();
 
         return () => {
@@ -90,6 +122,20 @@ export function ContentProvider({ children }) {
             supabase.removeChannel(channel);
         };
     }, []);
+
+    // Merge defaults ← saved overrides ← live deals.
+    const content = useMemo(
+        () => ({
+            ...DEFAULT_CONTENT,
+            ...site,
+            ui: { ...DEFAULT_CONTENT.ui, ...(site.ui || {}) },
+            featured: { ...DEFAULT_CONTENT.featured, ...(site.featured || {}) },
+            ticker: site.ticker ?? DEFAULT_CONTENT.ticker,
+            extras: site.extras ?? DEFAULT_CONTENT.extras,
+            deals: deals || [],
+        }),
+        [site, deals],
+    );
 
     const api = useMemo(() => {
         const scheduleSave = (id) => {
@@ -110,9 +156,29 @@ export function ContentProvider({ children }) {
             }, 600);
         };
 
+        const scheduleSiteSave = () => {
+            siteDirty.current = true;
+            clearTimeout(siteTimer.current);
+            siteTimer.current = setTimeout(async () => {
+                const { error } = await supabase.from("site_content").upsert({
+                    id: "main",
+                    data: siteRef.current,
+                    updated_at: new Date().toISOString(),
+                });
+                if (error) console.warn("Site save failed:", error.message);
+                siteDirty.current = false;
+            }, 600);
+        };
+
         return {
-            content: { ...DEFAULT_CONTENT, deals: deals || [] },
+            content,
             loading: deals === null,
+
+            /** Patch editable site content (ticker, featured, extras, ui…). */
+            updateSite(patch) {
+                setSite((prev) => ({ ...prev, ...patch }));
+                scheduleSiteSave();
+            },
 
             async addDeal(partial = {}) {
                 const item = {
@@ -129,7 +195,7 @@ export function ContentProvider({ children }) {
                     sort: 0,
                     ...partial,
                 };
-                setDeals((d) => [item, ...(d || [])]); // optimistic
+                setDeals((d) => [item, ...(d || [])]);
                 const { error } = await supabase
                     .from("deals")
                     .insert(toRow(item));
@@ -157,7 +223,6 @@ export function ContentProvider({ children }) {
                 if (error) console.warn("Delete failed:", error.message);
             },
 
-            /** Insert the built-in sample items (used when the board is empty). */
             async seedSamples() {
                 const rows = DEFAULT_CONTENT.deals.map((d, i) =>
                     toRow({ ...d, sort: i }),
@@ -172,7 +237,7 @@ export function ContentProvider({ children }) {
                 return null;
             },
         };
-    }, [deals]);
+    }, [content, deals]);
 
     return (
         <ContentContext.Provider value={api}>

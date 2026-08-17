@@ -12,6 +12,7 @@ import {
     joinSpec,
 } from "../data/content.js";
 import Brand from "../components/Brand.jsx";
+import SiteEditor from "./SiteEditor.jsx";
 
 const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
 
@@ -249,6 +250,7 @@ export default function AdminCMS() {
     const { signOut } = useAuth();
     const navigate = useNavigate();
     const [seeding, setSeeding] = useState(false);
+    const [tab, setTab] = useState("board");
 
     // Existing categories, offered as autocomplete suggestions in each editor.
     const categories = useMemo(() => {
@@ -277,9 +279,7 @@ export default function AdminCMS() {
                 <div className="max-w-[1100px] mx-auto px-5 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Brand size="text-xl" />
-                        <span className="uppercase-mono t-mute">
-                            / ניהול הלוח
-                        </span>
+                        <span className="uppercase-mono t-mute">/ ניהול</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <Link
@@ -300,13 +300,32 @@ export default function AdminCMS() {
             </header>
 
             <main className="max-w-[1100px] mx-auto px-5 py-8">
-                <datalist id="cms-categories">
-                    {categories.map((c) => (
-                        <option key={c} value={c} />
-                    ))}
-                </datalist>
+                <div className="flex flex-wrap gap-2 mb-8">
+                    <button
+                        onClick={() => setTab("board")}
+                        className={`cat-chip ${tab === "board" ? "cat-chip--active" : ""}`}
+                    >
+                        הלוח
+                    </button>
+                    <button
+                        onClick={() => setTab("site")}
+                        className={`cat-chip ${tab === "site" ? "cat-chip--active" : ""}`}
+                    >
+                        תוכן האתר
+                    </button>
+                </div>
 
-                <div className="flex items-center justify-between mb-6">
+                {tab === "site" && <SiteEditor />}
+
+                {tab === "board" && (
+                    <>
+                        <datalist id="cms-categories">
+                            {categories.map((c) => (
+                                <option key={c} value={c} />
+                            ))}
+                        </datalist>
+
+                        <div className="flex items-center justify-between mb-6">
                     <div>
                         <h1 className="font-display text-2xl md:text-3xl">
                             פריטי הלוח
@@ -364,12 +383,14 @@ export default function AdminCMS() {
                     )}
                 </div>
 
-                <div className="mt-10 pt-6 border-t t-rule">
-                    <p className="uppercase-mono t-mute max-w-xl">
-                        השינויים נשמרים בענן (Supabase) ומופיעים מיד אצל כל מי
-                        שגולש באתר.
-                    </p>
-                </div>
+                        <div className="mt-10 pt-6 border-t t-rule">
+                            <p className="uppercase-mono t-mute max-w-xl">
+                                השינויים נשמרים בענן (Supabase) ומופיעים מיד אצל
+                                כל מי שגולש באתר.
+                            </p>
+                        </div>
+                    </>
+                )}
             </main>
         </div>
     );

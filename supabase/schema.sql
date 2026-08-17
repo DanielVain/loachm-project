@@ -55,3 +55,29 @@ create policy "authenticated can delete product images"
 -- ── Live updates ──
 -- Push board changes to every open browser in real time.
 alter publication supabase_realtime add table public.deals;
+
+-- ───────────────────────────────────────────────────────────────
+-- Editable site content (ticker, NONSTOP, extras, section texts…).
+-- One JSON row, id = 'main'. Hero, phones and hours stay in code.
+-- ───────────────────────────────────────────────────────────────
+create table if not exists public.site_content (
+    id          text primary key,
+    data        jsonb       not null default '{}'::jsonb,
+    updated_at  timestamptz not null default now()
+);
+
+alter table public.site_content enable row level security;
+
+create policy "site content public read"
+    on public.site_content for select
+    using (true);
+
+create policy "site content authenticated insert"
+    on public.site_content for insert
+    to authenticated with check (true);
+
+create policy "site content authenticated update"
+    on public.site_content for update
+    to authenticated using (true) with check (true);
+
+alter publication supabase_realtime add table public.site_content;

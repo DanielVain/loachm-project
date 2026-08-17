@@ -125,6 +125,20 @@ export const DEFAULT_CONTENT = {
             { type: "לרכב", icon: "Zap", name: "מטען לרכב 45W", price: 89 },
         ],
     },
+    /* Section headings / labels — all editable in the CMS "site content" tab. */
+    ui: {
+        dealsKicker: "// במלאי עכשיו",
+        dealsTitle: "הלוח.",
+        dealsNote: "המחירים כוללים מע״מ. הכמויות מוגבלות לכל לקוח.",
+        extrasKicker: "// גם על המדף",
+        extrasTitle: "מעבר לכבלים.",
+        visitKicker: "// יש שאלות?",
+        visitTitle: "מתקשרים. אוספים.",
+        visitSubtitle: "או פשוט קופצים. אנחנו מול החוף וילג', בחדרה.",
+        whatsappTitle: "וואטסאפ",
+        whatsappDesc: "לבדיקת מלאי, הצעות מחיר וטרייד-אין.",
+        footerNote: "© 2026 · כל המחירים בשקלים · כולל מע״מ",
+    },
     deals: [
         {
             id: "d1",

@@ -45,10 +45,10 @@ export default function DealsGrid() {
                 <div className="flex flex-wrap items-end justify-between gap-4 mb-6 md:mb-8">
                     <div>
                         <div className="uppercase-mono t-green mb-2">
-                            // במלאי עכשיו
+                            {content.ui.dealsKicker}
                         </div>
                         <h2 className="font-display text-3xl md:text-5xl">
-                            הלוח.
+                            {content.ui.dealsTitle}
                         </h2>
                     </div>
 
@@ -126,7 +126,7 @@ export default function DealsGrid() {
                 </div>
 
                 <div className="mt-6 uppercase-mono t-mute text-center">
-                    המחירים כוללים מע״מ. הכמויות מוגבלות לכל לקוח.
+                    {content.ui.dealsNote}
                 </div>
             </div>
         </section>

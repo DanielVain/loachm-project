@@ -12,10 +12,10 @@ export default function ExtrasGrid() {
                 <div className="flex items-end justify-between mb-8">
                     <div>
                         <div className="uppercase-mono t-green mb-2">
-                            // גם על המדף
+                            {content.ui.extrasKicker}
                         </div>
                         <h2 className="font-display text-2xl md:text-4xl">
-                            מעבר לכבלים.
+                            {content.ui.extrasTitle}
                         </h2>
                     </div>
                     <ShoppingBag

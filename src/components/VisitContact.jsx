@@ -16,12 +16,14 @@ export default function VisitContact() {
         <section id="visit" className="t-bg">
             <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-14 md:py-20">
                 <div className="text-center mb-10 md:mb-14">
-                    <div className="uppercase-mono t-green mb-3">// יש שאלות?</div>
+                    <div className="uppercase-mono t-green mb-3">
+                        {content.ui.visitKicker}
+                    </div>
                     <h2 className="font-display text-4xl md:text-6xl mb-2">
-                        מתקשרים. אוספים.
+                        {content.ui.visitTitle}
                     </h2>
                     <p className="text-base md:text-lg t-mute">
-                        או פשוט קופצים. אנחנו {c.addressHe}, ב{c.city}.
+                        {content.ui.visitSubtitle}
                     </p>
                 </div>
 
@@ -86,10 +88,10 @@ export default function VisitContact() {
                     <div>
                         <div className="uppercase-mono t-green mb-3 flex items-center gap-2">
                             <Zap className="w-3 h-3" strokeWidth={2.5} />
-                            וואטסאפ
+                            {content.ui.whatsappTitle}
                         </div>
                         <div className="t-mute mb-2 text-sm">
-                            לבדיקת מלאי, הצעות מחיר וטרייד-אין.
+                            {content.ui.whatsappDesc}
                         </div>
                         <a
                             href={waLink}
@@ -109,7 +111,7 @@ export default function VisitContact() {
                         <Brand size="text-base" />
                         <span>· משנת {content.brand.established}</span>
                     </div>
-                    <div>© 2026 · כל המחירים בשקלים · כולל מע״מ</div>
+                    <div>{content.ui.footerNote}</div>
                 </div>
             </div>
         </section>
