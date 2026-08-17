@@ -136,7 +136,7 @@ function DealEditor({ deal, onChange, onRemove }) {
                                 ))}
                             </select>
                             <span className="icon-preview" title={deal.icon}>
-                                <Icon className="w-5 h-5" strokeWidth={1.6} />
+                                <Icon className="w-6 h-6" strokeWidth={2} />
                             </span>
                         </div>
                     </Field>

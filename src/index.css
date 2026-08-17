@@ -437,14 +437,15 @@ body {
 }
 .icon-preview {
     flex-shrink: 0;
-    width: 42px;
+    width: 52px;
+    min-height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--rule);
+    border: 1px solid #0a0a0a;
     border-radius: 2px;
-    background-color: var(--bg-2);
-    color: var(--green-text);
+    background-color: var(--green-bg);
+    color: #0a1f00;
 }
 
 /* ── Weekly sale box (high-contrast, brand pop) ── */

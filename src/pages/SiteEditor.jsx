@@ -50,7 +50,7 @@ function IconSelect({ label, value, onChange }) {
                     ))}
                 </select>
                 <span className="icon-preview" title={value}>
-                    <Icon className="w-5 h-5" strokeWidth={1.6} />
+                    <Icon className="w-6 h-6" strokeWidth={2} />
                 </span>
             </div>
         </label>
