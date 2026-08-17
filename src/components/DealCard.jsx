@@ -1,4 +1,4 @@
-import { Flame, ArrowUpLeft } from "lucide-react";
+import { Flame } from "lucide-react";
 import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
 import Led from "./Led.jsx";
 
@@ -27,7 +27,11 @@ export default function DealCard({ deal }) {
             ) : null}
 
             <div className="flex items-start justify-between mb-6">
-                <div className="uppercase-mono t-mute">{deal.cat}</div>
+                {deal.cat ? (
+                    <span className="deal-cat">{deal.cat}</span>
+                ) : (
+                    <span />
+                )}
                 <Icon className="deal-icon t-mute w-7 h-7" strokeWidth={1.3} />
             </div>
 
@@ -63,15 +67,11 @@ export default function DealCard({ deal }) {
                 <div className="font-display text-3xl md:text-4xl t-green leading-none mb-4">
                     {fmt(deal.now)} ₪
                 </div>
-                <div className="flex items-center justify-between border-t t-rule-soft pt-3">
+                <div className="flex items-center border-t t-rule-soft pt-3">
                     <span className="uppercase-mono t-mute flex items-center gap-2">
                         <Led px={6} />
                         {deal.stock} במלאי
                     </span>
-                    <button className="deal-cta uppercase-mono border t-rule px-3 py-1.5 flex items-center gap-1.5 transition-all">
-                        שריון
-                        <ArrowUpLeft className="w-3 h-3" strokeWidth={2.5} />
-                    </button>
                 </div>
             </div>
         </div>

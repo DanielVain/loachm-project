@@ -132,13 +132,13 @@ body {
     transform: translateY(-3px);
     border-color: var(--green-bg);
 }
-.deal-card:hover .deal-cta {
-    background-color: var(--green-bg);
-    color: #0a0a0a;
-    border-color: var(--green-bg);
-}
 .deal-card:hover .deal-icon {
     color: var(--green-text);
+}
+.deal-card:hover .deal-cat {
+    background-color: var(--green-bg);
+    color: #0a1f00;
+    border-color: var(--green-bg);
 }
 
 /* ── Blinking LED ── */
@@ -288,6 +288,25 @@ body {
     color: #05111f;
     border-color: #7dd3fc;
     box-shadow: 0 0 32px rgba(56, 189, 248, 0.35);
+}
+
+/* ── Board card category pill ── */
+.deal-cat {
+    display: inline-block;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--green-text);
+    background-color: rgba(152, 200, 56, 0.14);
+    border: 1px solid rgba(152, 200, 56, 0.45);
+    padding: 3px 10px;
+    border-radius: 9999px;
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease,
+        border-color 0.25s ease;
 }
 
 /* ── Spec rendered as a middle-dot separated list ── */
