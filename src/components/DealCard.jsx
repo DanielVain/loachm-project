@@ -17,9 +17,11 @@ export default function DealCard({ deal }) {
             role="button"
             tabIndex={0}
             aria-label={`פרטים על ${deal.name}`}
-            onClick={() => setOpen(true)}
+            onClick={() => {
+                if (!open) setOpen(true); // never reopen from a bubbled close
+            }}
             onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
+                if (!open && (e.key === "Enter" || e.key === " ")) {
                     e.preventDefault();
                     setOpen(true);
                 }
