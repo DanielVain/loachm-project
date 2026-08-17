@@ -435,6 +435,17 @@ body {
 .cms-upload:hover {
     background-color: var(--bg-2);
 }
+.icon-preview {
+    flex-shrink: 0;
+    width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background-color: var(--bg-2);
+    color: var(--green-text);
+}
 
 /* ── Weekly sale box (high-contrast, brand pop) ── */
 .weekly-drop-box {

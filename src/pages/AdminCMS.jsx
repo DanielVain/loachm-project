@@ -121,17 +121,24 @@ function DealEditor({ deal, onChange, onRemove }) {
                         />
                     </Field>
                     <Field label="אייקון">
-                        <select
-                            className="cms-input"
-                            value={deal.icon}
-                            onChange={(e) => onChange({ icon: e.target.value })}
-                        >
-                            {ICON_CHOICES.map((name) => (
-                                <option key={name} value={name}>
-                                    {name}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="flex items-stretch gap-2">
+                            <select
+                                className="cms-input flex-1"
+                                value={deal.icon}
+                                onChange={(e) =>
+                                    onChange({ icon: e.target.value })
+                                }
+                            >
+                                {ICON_CHOICES.map((name) => (
+                                    <option key={name} value={name}>
+                                        {name}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="icon-preview" title={deal.icon}>
+                                <Icon className="w-5 h-5" strokeWidth={1.6} />
+                            </span>
+                        </div>
                     </Field>
                     <div className="col-span-2 md:col-span-3 flex flex-col gap-1.5">
                         <span className="uppercase-mono t-mute">מפרט</span>

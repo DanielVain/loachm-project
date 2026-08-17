@@ -1,6 +1,6 @@
 import { Plus, X } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { ICON_CHOICES } from "../data/content.js";
+import { ICON_CHOICES, iconFor } from "../data/content.js";
 
 /* ── Small building blocks ─────────────────────────────────────── */
 
@@ -33,20 +33,26 @@ function Area({ label, value, onChange }) {
 }
 
 function IconSelect({ label, value, onChange }) {
+    const Icon = iconFor(value);
     return (
         <label className="flex flex-col gap-1">
             <span className="uppercase-mono t-mute">{label}</span>
-            <select
-                className="cms-input"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-            >
-                {ICON_CHOICES.map((n) => (
-                    <option key={n} value={n}>
-                        {n}
-                    </option>
-                ))}
-            </select>
+            <div className="flex items-stretch gap-2">
+                <select
+                    className="cms-input flex-1"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                >
+                    {ICON_CHOICES.map((n) => (
+                        <option key={n} value={n}>
+                            {n}
+                        </option>
+                    ))}
+                </select>
+                <span className="icon-preview" title={value}>
+                    <Icon className="w-5 h-5" strokeWidth={1.6} />
+                </span>
+            </div>
         </label>
     );
 }
