@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@400;700;900&display=swap");
+/* Fonts are loaded via <link rel="preconnect"> + stylesheet in index.html so
+   they fetch in parallel instead of being chained behind this CSS bundle. */
 
 @tailwind base;
 @tailwind components;
