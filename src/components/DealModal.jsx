@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { X, Flame, Phone } from "lucide-react";
 import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
@@ -11,6 +11,16 @@ export default function DealModal({ deal, onClose }) {
     const Icon = iconFor(deal.icon);
     const discount = pct(deal.was, deal.now);
     const specs = splitSpec(deal.spec);
+
+    // Close on outside-click, but only when the press *starts* on the backdrop
+    // (so dragging/selecting inside the panel never closes it by accident).
+    const pressedOutside = useRef(false);
+    const onBackdropPointerDown = (e) => {
+        pressedOutside.current = e.target === e.currentTarget;
+    };
+    const onBackdropClick = (e) => {
+        if (pressedOutside.current && e.target === e.currentTarget) onClose();
+    };
 
     useEffect(() => {
         const onKey = (e) => e.key === "Escape" && onClose();
@@ -26,16 +36,13 @@ export default function DealModal({ deal, onClose }) {
     return createPortal(
         <div
             className="deal-modal-backdrop"
-            onClick={onClose}
+            onPointerDown={onBackdropPointerDown}
+            onClick={onBackdropClick}
             role="dialog"
             aria-modal="true"
             aria-label={deal.name}
         >
-            <div
-                className="deal-modal t-card"
-                onClick={(e) => e.stopPropagation()}
-                dir="rtl"
-            >
+            <div className="deal-modal t-card" dir="rtl">
                 <button
                     className="deal-modal-close"
                     onClick={onClose}

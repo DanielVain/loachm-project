@@ -799,6 +799,10 @@ body {
     background-color: rgba(6, 10, 18, 0.72);
     backdrop-filter: blur(4px);
     animation: modal-fade 0.18s ease;
+    cursor: zoom-out; /* invites click-outside-to-close */
+}
+.deal-modal {
+    cursor: default;
 }
 @keyframes modal-fade {
     from {
