@@ -52,6 +52,11 @@ html {
     display: none;
 }
 
+/* Light is the default palette. Before React mounts (no data-theme yet), the
+   media query below flips to dark automatically for OS-dark users, so there's
+   no light flash — no inline script needed (CSP keeps script-src 'self').
+   An explicit manual choice via [data-theme] always wins. */
+:root,
 [data-theme="light"] {
     --bg: #eef2f8;
     --bg-2: #e4ebf5;
@@ -64,6 +69,21 @@ html {
     --green-text: #98c838;
     --blue: #2f9be6;
     --scan: rgba(22, 27, 36, 0.025);
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #0a0f18;
+        --bg-2: #0d1320;
+        --card: #111827;
+        --text: #e9eef6;
+        --mute: #8493a6;
+        --rule: #20293a;
+        --rule-soft: #18202e;
+        --green-bg: #98c838;
+        --green-text: #98c838;
+        --blue: #38bdf8;
+        --scan: rgba(56, 189, 248, 0.03);
+    }
 }
 [data-theme="dark"] {
     --bg: #0a0f18;
