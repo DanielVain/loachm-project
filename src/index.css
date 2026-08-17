@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Heebo:wght@400;700;900&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ── Fluid base type: scales the whole UI a bit larger and grows with the
    viewport. All rem-based sizes (text + spacing) follow this automatically. */
 html {

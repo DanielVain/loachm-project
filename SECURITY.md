@@ -39,9 +39,8 @@ maintained in the Supabase dashboard.
 - Dependencies kept patched (`npm audit`).
 - `robots.txt` disallows `/admin`.
 
-## Known follow-up
+## Build
 
-- `index.html` still loads the **Tailwind Play CDN** (`cdn.tailwindcss.com`),
-  which forces `script-src 'unsafe-eval'` in the CSP. Migrating Tailwind to a
-  build step (PostCSS/Vite) would let us drop `unsafe-eval` and remove a
-  third-party script dependency (also a performance win). Requires visual QA.
+- Tailwind runs as a **local build** (Tailwind v3 + PostCSS, `tailwind.config.js`
+  / `postcss.config.js`) — no third-party CDN script. This lets the CSP keep
+  `script-src 'self'` (no `unsafe-eval`, no external script origin).
