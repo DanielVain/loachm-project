@@ -64,9 +64,11 @@ function Card({ title, children }) {
 
 export default function SiteEditor() {
     const { content, updateSite } = useContent();
-    const { ui, featured, ticker, extras } = content;
+    const { ui, featured, ticker, extras, weeklyDrop } = content;
 
     const setUi = (key, val) => updateSite({ ui: { ...ui, [key]: val } });
+    const setWeekly = (key, val) =>
+        updateSite({ weeklyDrop: { ...weeklyDrop, [key]: val } });
     const setFeatured = (key, val) =>
         updateSite({ featured: { ...featured, [key]: val } });
     const setFeaturedItem = (i, patch) =>
@@ -128,6 +130,37 @@ export default function SiteEditor() {
                         <Plus className="w-3 h-3" strokeWidth={2.5} />
                         הוסף שורה
                     </button>
+                </div>
+            </Card>
+
+            {/* ── Weekly sale (hero) ── */}
+            <Card title="מבצע שבועי (בהירו)">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Text
+                        label="כותרת"
+                        value={weeklyDrop.title}
+                        onChange={(v) => setWeekly("title", v)}
+                    />
+                    <Text
+                        label="אחוז הנחה"
+                        value={weeklyDrop.pct}
+                        onChange={(v) => setWeekly("pct", Number(v) || 0)}
+                    />
+                    <Text
+                        label="הערה"
+                        value={weeklyDrop.note}
+                        onChange={(v) => setWeekly("note", v)}
+                    />
+                    <Text
+                        label="תווית סיום"
+                        value={weeklyDrop.endsLabel}
+                        onChange={(v) => setWeekly("endsLabel", v)}
+                    />
+                    <Text
+                        label="מועד סיום"
+                        value={weeklyDrop.endsValue}
+                        onChange={(v) => setWeekly("endsValue", v)}
+                    />
                 </div>
             </Card>
 

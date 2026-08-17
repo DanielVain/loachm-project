@@ -389,6 +389,50 @@ body {
     background-color: var(--bg-2);
 }
 
+/* ── Weekly sale box (high-contrast, brand pop) ── */
+.weekly-drop-box {
+    background: linear-gradient(150deg, #a7d63f 0%, #85bb2c 100%);
+    border: 2px solid #0a0a0a;
+    box-shadow: 6px 6px 0 rgba(10, 10, 10, 0.9);
+    border-radius: 2px;
+}
+.weekly-drop-ink {
+    color: #0d1f00;
+}
+.weekly-drop-ink-soft {
+    color: rgba(13, 31, 0, 0.72);
+}
+.weekly-drop-pct {
+    font-family: "Archivo Black", sans-serif;
+    color: #0d1f00;
+    text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.35);
+}
+.weekly-drop-rule {
+    border-top: 1px solid rgba(13, 31, 0, 0.25);
+}
+
+/* ── Repair status badge ── */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+.status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
 /* ── Board: 2-row infinite auto-scroll (native scroll + JS) ── */
 .board-scroller {
     overflow-x: auto;

@@ -129,6 +129,10 @@ export function ContentProvider({ children }) {
             ...DEFAULT_CONTENT,
             ...site,
             ui: { ...DEFAULT_CONTENT.ui, ...(site.ui || {}) },
+            weeklyDrop: {
+                ...DEFAULT_CONTENT.weeklyDrop,
+                ...(site.weeklyDrop || {}),
+            },
             featured: { ...DEFAULT_CONTENT.featured, ...(site.featured || {}) },
             ticker: site.ticker ?? DEFAULT_CONTENT.ticker,
             extras: site.extras ?? DEFAULT_CONTENT.extras,

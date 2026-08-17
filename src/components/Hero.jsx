@@ -68,23 +68,24 @@ export default function Hero() {
                     </div>
 
                     <div className="col-span-12 md:col-span-4">
-                        <div
-                            className="border-2 t-card p-5 md:p-6"
-                            style={{ borderColor: "var(--green-bg)" }}
-                        >
-                            <div className="uppercase-mono t-green mb-3 flex items-center gap-2">
+                        <div className="weekly-drop-box p-5 md:p-6">
+                            <div className="uppercase-mono mb-3 flex items-center gap-2 weekly-drop-ink">
                                 <Flame className="w-3 h-3" strokeWidth={2.5} />
-                                המבצע השבועי
+                                {content.weeklyDrop.title}
                             </div>
-                            <div className="font-display text-5xl md:text-6xl mb-1 leading-none big-drop">
+                            <div className="font-display text-6xl md:text-7xl mb-1 leading-none weekly-drop-pct">
                                 −{content.weeklyDrop.pct}%
                             </div>
-                            <div className="text-sm t-mute mb-4 mt-2">
+                            <div className="text-sm mb-4 mt-2 weekly-drop-ink-soft">
                                 {content.weeklyDrop.note}
                             </div>
-                            <div className="border-t t-rule pt-3 flex items-center justify-between uppercase-mono">
-                                <span className="t-mute">מסתיים</span>
-                                <span>שישי · 15:30</span>
+                            <div className="weekly-drop-rule pt-3 flex items-center justify-between uppercase-mono weekly-drop-ink">
+                                <span className="opacity-70">
+                                    {content.weeklyDrop.endsLabel}
+                                </span>
+                                <span className="font-bold">
+                                    {content.weeklyDrop.endsValue}
+                                </span>
                             </div>
                         </div>
                     </div>

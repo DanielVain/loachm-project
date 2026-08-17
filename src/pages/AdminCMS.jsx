@@ -13,6 +13,7 @@ import {
 } from "../data/content.js";
 import Brand from "../components/Brand.jsx";
 import SiteEditor from "./SiteEditor.jsx";
+import RepairsEditor from "./RepairsEditor.jsx";
 
 const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
 
@@ -313,9 +314,16 @@ export default function AdminCMS() {
                     >
                         תוכן האתר
                     </button>
+                    <button
+                        onClick={() => setTab("repairs")}
+                        className={`cat-chip ${tab === "repairs" ? "cat-chip--active" : ""}`}
+                    >
+                        תיקונים
+                    </button>
                 </div>
 
                 {tab === "site" && <SiteEditor />}
+                {tab === "repairs" && <RepairsEditor />}
 
                 {tab === "board" && (
                     <>

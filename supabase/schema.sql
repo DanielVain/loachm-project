@@ -81,3 +81,34 @@ create policy "site content authenticated update"
     to authenticated using (true) with check (true);
 
 alter publication supabase_realtime add table public.site_content;
+
+-- ───────────────────────────────────────────────────────────────
+-- Repairs / service log. Contains customer PII (name, phone), so it is
+-- ADMIN-ONLY: every operation requires an authenticated session. No public
+-- read, unlike deals/site_content.
+-- ───────────────────────────────────────────────────────────────
+create table if not exists public.repairs (
+    id          text primary key,
+    item        text        not null default '',
+    customer    text        not null default '',
+    phone       text        not null default '',
+    issue       text        not null default '',
+    status      text        not null default 'received',
+    price       numeric     not null default 0,
+    notes       text        not null default '',
+    created_at  timestamptz not null default now(),
+    updated_at  timestamptz not null default now()
+);
+
+alter table public.repairs enable row level security;
+
+create policy "repairs authenticated read"
+    on public.repairs for select to authenticated using (true);
+create policy "repairs authenticated insert"
+    on public.repairs for insert to authenticated with check (true);
+create policy "repairs authenticated update"
+    on public.repairs for update to authenticated using (true) with check (true);
+create policy "repairs authenticated delete"
+    on public.repairs for delete to authenticated using (true);
+
+alter publication supabase_realtime add table public.repairs;

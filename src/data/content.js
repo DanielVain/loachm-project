@@ -106,7 +106,13 @@ export const DEFAULT_CONTENT = {
         "תיקון ושדרוג מחשבים וקונסולות",
         "גל פאנקו מארוול חדש הגיע",
     ],
-    weeklyDrop: { pct: 30, note: "על מקלדות, עכברים ואוזניות נבחרים." },
+    weeklyDrop: {
+        title: "המבצע השבועי",
+        pct: 30,
+        note: "על מקלדות, עכברים ואוזניות נבחרים.",
+        endsLabel: "מסתיים",
+        endsValue: "שישי · 15:30",
+    },
     featured: {
         label: "בלעדי בישראל",
         title: "NONSTOP",
