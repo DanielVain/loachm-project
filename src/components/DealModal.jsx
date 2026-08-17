@@ -14,11 +14,18 @@ export default function DealModal({ deal, onClose }) {
 
     // Close on outside-click, but only when the press *starts* on the backdrop
     // (so dragging/selecting inside the panel never closes it by accident).
+    //
+    // The modal is rendered through a portal — and React bubbles portal events
+    // up the *component* tree, not the DOM tree. Without stopPropagation the
+    // click would reach the DealCard's onClick and instantly reopen the modal,
+    // so every handler here stops propagation back into the app.
     const pressedOutside = useRef(false);
     const onBackdropPointerDown = (e) => {
+        e.stopPropagation();
         pressedOutside.current = e.target === e.currentTarget;
     };
     const onBackdropClick = (e) => {
+        e.stopPropagation();
         if (pressedOutside.current && e.target === e.currentTarget) onClose();
     };
 
@@ -38,6 +45,7 @@ export default function DealModal({ deal, onClose }) {
             className="deal-modal-backdrop"
             onPointerDown={onBackdropPointerDown}
             onClick={onBackdropClick}
+            onKeyDown={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
             aria-label={deal.name}
