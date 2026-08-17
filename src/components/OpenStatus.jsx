@@ -27,7 +27,13 @@ export default function OpenStatus({ className = "", showDetail = true }) {
             } ${className}`}
         >
             <span className="open-badge-dot" />
-            {status.open ? "פתוח עכשיו" : "סגור"}
+            {status.open ? (
+                <>
+                    פתוח<span className="open-badge-now">&nbsp;עכשיו</span>
+                </>
+            ) : (
+                "סגור"
+            )}
             {showDetail && detail && (
                 <span className="open-badge-detail">{detail}</span>
             )}

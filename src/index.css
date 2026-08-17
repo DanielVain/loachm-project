@@ -669,6 +669,12 @@ body {
         display: none;
     }
 }
+/* On phones, shorten "פתוח עכשיו" → "פתוח" to avoid overflow. */
+@media (max-width: 640px) {
+    .open-badge-now {
+        display: none;
+    }
+}
 
 /* ── Directions buttons (Waze / Maps) ── */
 .dir-btns {
