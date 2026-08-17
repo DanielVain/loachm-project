@@ -541,6 +541,21 @@ body {
     border-color: var(--green-bg);
 }
 
+/* Board category filters — larger / more prominent than default chips. */
+.board-cats .cat-chip {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 10px 20px;
+    border-width: 1.5px;
+}
+.board-cats .cat-chip:hover {
+    transform: translateY(-1px);
+}
+.board-cats .cat-chip--active {
+    box-shadow: 0 3px 14px rgba(152, 200, 56, 0.35);
+}
+
 /* ── "וילג'" badge by the store name ── */
 .village-badge {
     font-family: "Heebo", sans-serif;

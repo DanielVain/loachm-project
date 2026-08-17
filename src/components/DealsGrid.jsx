@@ -78,7 +78,7 @@ export default function DealsGrid() {
 
                 {/* category chips */}
                 {categories.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-8">
+                    <div className="board-cats flex flex-wrap gap-2.5 mb-8">
                         <button
                             onClick={() => setCat("all")}
                             className={`cat-chip ${cat === "all" ? "cat-chip--active" : ""}`}
