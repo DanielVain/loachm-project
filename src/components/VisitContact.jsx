@@ -1,7 +1,8 @@
-import { Phone, MapPin, Clock, Zap } from "lucide-react";
+import { Phone, MapPin, Clock, Zap, Navigation, Map } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
 import Brand from "./Brand.jsx";
+import OpenStatus from "./OpenStatus.jsx";
 
 /** "יש שאלות?" — call CTA, store details, opening hours, WhatsApp + footer. */
 export default function VisitContact() {
@@ -11,6 +12,11 @@ export default function VisitContact() {
     // Build a wa.me link: strip non-digits, drop a leading 0, prepend 972 (IL).
     const waNumber = "972" + c.whatsapp.replace(/\D/g, "").replace(/^0/, "");
     const waLink = `https://wa.me/${waNumber}`;
+
+    // Directions — one-tap navigation to the physical store.
+    const q = encodeURIComponent(`${c.street} ${c.city}`);
+    const wazeLink = `https://waze.com/ul?q=${q}&navigate=yes`;
+    const mapsLink = `https://www.google.com/maps/search/?api=1&query=${q}`;
 
     return (
         <section id="visit" className="t-bg">
@@ -58,7 +64,31 @@ export default function VisitContact() {
                             {c.street}, {c.city}
                         </div>
                         <div className="t-mute text-sm">{c.addressHe}</div>
-                        <div className="t-mute text-sm">{c.landmark}</div>
+                        <div className="t-mute text-sm mb-4">{c.landmark}</div>
+
+                        <div className="dir-btns">
+                            <a
+                                href={wazeLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="dir-btn"
+                            >
+                                <Navigation
+                                    className="w-4 h-4"
+                                    strokeWidth={2.2}
+                                />
+                                ניווט ב-Waze
+                            </a>
+                            <a
+                                href={mapsLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="dir-btn"
+                            >
+                                <Map className="w-4 h-4" strokeWidth={2.2} />
+                                Google Maps
+                            </a>
+                        </div>
                     </div>
 
                     {/* שעות פתיחה */}
@@ -66,6 +96,9 @@ export default function VisitContact() {
                         <div className="uppercase-mono t-green mb-3 flex items-center gap-2">
                             <Clock className="w-3 h-3" strokeWidth={2.5} />
                             שעות פתיחה
+                        </div>
+                        <div className="mb-4">
+                            <OpenStatus />
                         </div>
                         <div className="hours-list">
                             {content.hours.map((h) => (

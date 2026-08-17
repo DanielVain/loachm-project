@@ -6,7 +6,7 @@ import DealCard from "./DealCard.jsx";
 
 /** "הלוח" — the board: filterable 2-row auto-scrolling carousel of deals. */
 export default function DealsGrid() {
-    const { content } = useContent();
+    const { content, loading } = useContent();
     const deals = content.deals;
 
     const [query, setQuery] = useState("");
@@ -97,7 +97,13 @@ export default function DealsGrid() {
                     </div>
                 )}
 
-                {filtered.length === 0 ? (
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <div key={i} className="deal-skeleton" />
+                        ))}
+                    </div>
+                ) : filtered.length === 0 ? (
                     <div className="t-mute font-mono text-sm py-12 text-center border t-rule">
                         {deals.length === 0
                             ? "אין פריטים בלוח כרגע."
@@ -113,17 +119,19 @@ export default function DealsGrid() {
                     </div>
                 )}
 
-                <div className="mt-6 flex items-center justify-between gap-3 uppercase-mono t-mute">
-                    <span>
-                        {filtered.length} פריטים
-                        {hasFilter ? ` (מתוך ${deals.length})` : ""}
-                    </span>
-                    {useCarousel && (
-                        <span className="hidden md:inline">
-                            נע אוטומטית · אפשר לגלול · מרחפים לעצירה
+                {!loading && (
+                    <div className="mt-6 flex items-center justify-between gap-3 uppercase-mono t-mute">
+                        <span>
+                            {filtered.length} פריטים
+                            {hasFilter ? ` (מתוך ${deals.length})` : ""}
                         </span>
-                    )}
-                </div>
+                        {useCarousel && (
+                            <span className="hidden md:inline">
+                                נע אוטומטית · אפשר לגלול · מרחפים לעצירה
+                            </span>
+                        )}
+                    </div>
+                )}
 
                 <div className="mt-6 uppercase-mono t-mute text-center">
                     {content.ui.dealsNote}

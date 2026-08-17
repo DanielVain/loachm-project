@@ -1,15 +1,30 @@
-import { Flame } from "lucide-react";
+import { useState } from "react";
+import { Flame, Maximize2 } from "lucide-react";
 import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
 import Led from "./Led.jsx";
+import DealModal from "./DealModal.jsx";
 
 /** A single board item. Shows a product photo when one is set, otherwise
-    falls back to the category icon. */
+    falls back to the category icon. Click / tap opens a detail lightbox. */
 export default function DealCard({ deal }) {
     const Icon = iconFor(deal.icon);
     const discount = pct(deal.was, deal.now);
+    const [open, setOpen] = useState(false);
 
     return (
-        <div className="deal-card t-card border t-rule p-5 md:p-6 flex flex-col relative">
+        <div
+            className="deal-card t-card border t-rule p-5 md:p-6 flex flex-col relative"
+            role="button"
+            tabIndex={0}
+            aria-label={`פרטים על ${deal.name}`}
+            onClick={() => setOpen(true)}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setOpen(true);
+                }
+            }}
+        >
             {deal.hot && (
                 <div
                     className="absolute top-0 left-0 t-green-bg px-2 py-1 font-mono text-[0.7rem] font-bold tracking-wider flex items-center gap-1 z-10"
@@ -23,6 +38,9 @@ export default function DealCard({ deal }) {
             {deal.image ? (
                 <div className="deal-photo mb-5">
                     <img src={deal.image} alt={deal.name} loading="lazy" />
+                    <span className="deal-photo-zoom" aria-hidden="true">
+                        <Maximize2 className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    </span>
                 </div>
             ) : null}
 
@@ -79,6 +97,10 @@ export default function DealCard({ deal }) {
                     </span>
                 </div>
             </div>
+
+            {open && (
+                <DealModal deal={deal} onClose={() => setOpen(false)} />
+            )}
         </div>
     );
 }

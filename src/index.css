@@ -602,6 +602,254 @@ body {
     box-shadow: 0 3px 14px rgba(152, 200, 56, 0.35);
 }
 
+/* ── Live "פתוח עכשיו / סגור" badge ── */
+.open-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+.open-badge-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    flex-shrink: 0;
+}
+.open-badge-detail {
+    font-weight: 500;
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+}
+.open-badge--open {
+    color: #2e6f0e;
+    background-color: rgba(152, 200, 56, 0.16);
+    border-color: rgba(152, 200, 56, 0.55);
+}
+.open-badge--open .open-badge-dot {
+    background-color: var(--green-bg);
+    animation: blink 2.4s ease-in-out infinite;
+}
+[data-theme="dark"] .open-badge--open {
+    color: #bfe86a;
+}
+.open-badge--closed {
+    color: var(--mute);
+    background-color: var(--bg-2);
+    border-color: var(--rule);
+}
+.open-badge--closed .open-badge-dot {
+    background-color: var(--mute);
+    opacity: 0.6;
+}
+/* Header instance stays compact on mid-width screens. */
+@media (max-width: 1140px) {
+    .open-badge.header-open .open-badge-detail {
+        display: none;
+    }
+}
+
+/* ── Directions buttons (Waze / Maps) ── */
+.dir-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.dir-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border: 1.5px solid var(--rule);
+    color: var(--text);
+    background-color: var(--card);
+    border-radius: 2px;
+    transition: all 0.18s ease;
+}
+.dir-btn:hover {
+    border-color: var(--green-bg);
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+    transform: translateY(-1px);
+}
+
+/* ── Board card: click-to-open affordance ── */
+.deal-card {
+    cursor: pointer;
+}
+.deal-card:focus-visible {
+    outline: 2px solid var(--green-bg);
+    outline-offset: 2px;
+}
+.deal-photo {
+    position: relative;
+}
+.deal-photo-zoom {
+    position: absolute;
+    top: 8px;
+    inset-inline-end: 8px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: rgba(10, 10, 10, 0.55);
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+.deal-card:hover .deal-photo-zoom,
+.deal-card:focus-visible .deal-photo-zoom {
+    opacity: 1;
+}
+@media (hover: none) {
+    .deal-photo-zoom {
+        opacity: 1;
+    }
+}
+
+/* ── Loading skeleton cards ── */
+@keyframes skeleton-shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+.deal-skeleton {
+    position: relative;
+    overflow: hidden;
+    min-height: 300px;
+    border: 1px solid var(--rule);
+    background-color: var(--card);
+    border-radius: 2px;
+}
+.deal-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(152, 200, 56, 0.09),
+        transparent
+    );
+    animation: skeleton-shimmer 1.5s infinite;
+}
+
+/* ── Deal detail lightbox ── */
+.deal-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background-color: rgba(6, 10, 18, 0.72);
+    backdrop-filter: blur(4px);
+    animation: modal-fade 0.18s ease;
+}
+@keyframes modal-fade {
+    from {
+        opacity: 0;
+    }
+}
+.deal-modal {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    max-height: 92vh;
+    overflow-y: auto;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    animation: modal-rise 0.2s ease;
+}
+@keyframes modal-rise {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+}
+.deal-modal-close {
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 12px;
+    z-index: 2;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: rgba(10, 10, 10, 0.55);
+    color: #fff;
+    transition: background-color 0.18s ease;
+}
+.deal-modal-close:hover {
+    background-color: rgba(10, 10, 10, 0.85);
+}
+.deal-modal-photo {
+    aspect-ratio: 16 / 10;
+    background-color: var(--bg-2);
+    border-bottom: 1px solid var(--rule);
+    overflow: hidden;
+}
+.deal-modal-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.deal-modal-photo--icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.deal-modal-body {
+    padding: 22px 22px 26px;
+}
+.deal-hot-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+}
+.deal-modal-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 18px;
+    font-weight: 800;
+    font-size: 0.95rem;
+    border-radius: 2px;
+    transition: opacity 0.18s ease;
+}
+.deal-modal-cta:hover {
+    opacity: 0.9;
+}
+
 /* ── "וילג'" badge by the store name ── */
 .village-badge {
     font-family: "Heebo", sans-serif;

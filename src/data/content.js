@@ -313,3 +313,94 @@ export const pct = (was, now) =>
 /** Stable-ish id generator for new board items. */
 export const newId = () =>
     "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+/* ───────────────────────────────────────────────────────────────
+   Opening-hours logic — powers the live "פתוח עכשיו / סגור" badge.
+
+   OPEN_HOURS mirrors the human-readable `hours` above as machine
+   ranges, keyed by JS weekday (0 = Sunday … 6 = Saturday), each an
+   array of [openMinute, closeMinute] windows (minutes from midnight).
+   Kept here (static) because opening hours are a fixed feature.
+   ─────────────────────────────────────────────────────────────── */
+const M = (h, m = 0) => h * 60 + m;
+export const OPEN_HOURS = {
+    0: [[M(9, 30), M(21, 30)]], // ראשון
+    1: [[M(9, 30), M(21, 30)]], // שני
+    2: [[M(9, 30), M(21, 30)]], // שלישי
+    3: [[M(9, 30), M(21, 30)]], // רביעי
+    4: [[M(9, 30), M(22, 0)]], // חמישי
+    5: [[M(9, 0), M(15, 30)]], // שישי
+    6: [[M(20, 0), M(23, 0)]], // מוצאי שבת
+};
+
+export const HE_DAYS = [
+    "יום ראשון",
+    "יום שני",
+    "יום שלישי",
+    "יום רביעי",
+    "יום חמישי",
+    "יום שישי",
+    "שבת",
+];
+
+const fromMinutes = (mins) =>
+    `${String(Math.floor(mins / 60) % 24).padStart(2, "0")}:${String(
+        mins % 60,
+    ).padStart(2, "0")}`;
+
+/** Current weekday + minutes-from-midnight in a given timezone. */
+function nowInTZ(tz = "Asia/Jerusalem", date = new Date()) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        hour12: false,
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+    }).formatToParts(date);
+    const p = {};
+    for (const part of parts) p[part.type] = part.value;
+    const dayIndex = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    return {
+        day: dayIndex[p.weekday] ?? new Date().getDay(),
+        minutes: (Number(p.hour) % 24) * 60 + Number(p.minute),
+    };
+}
+
+/**
+ * Live open/closed status for the store, evaluated in Israel time.
+ * Returns { open, closesLabel } when open, or
+ * { open:false, opensLabel, opensWhen } with the next opening.
+ */
+export function storeStatus(date = new Date()) {
+    const { day, minutes } = nowInTZ("Asia/Jerusalem", date);
+    const today = OPEN_HOURS[day] || [];
+
+    for (const [start, end] of today) {
+        if (minutes >= start && minutes < end) {
+            return { open: true, closesLabel: fromMinutes(end) };
+        }
+    }
+    // Later today?
+    for (const [start] of today) {
+        if (start > minutes) {
+            return {
+                open: false,
+                opensWhen: "היום",
+                opensLabel: fromMinutes(start),
+            };
+        }
+    }
+    // Scan forward for the next day that has any hours.
+    for (let i = 1; i <= 7; i++) {
+        const d = (day + i) % 7;
+        const ranges = OPEN_HOURS[d];
+        if (ranges && ranges.length) {
+            return {
+                open: false,
+                opensWhen: i === 1 ? "מחר" : HE_DAYS[d],
+                opensLabel: fromMinutes(ranges[0][0]),
+            };
+        }
+    }
+    return { open: false };
+}

@@ -2,6 +2,7 @@ import { Phone, Sun, Moon } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
 import Brand from "./Brand.jsx";
+import OpenStatus from "./OpenStatus.jsx";
 
 const NAV = [
     { href: "#nonstop", label: "NONSTOP" },
@@ -24,6 +25,7 @@ export default function Header({ dark, onToggleTheme }) {
                         <span className="village-badge hidden sm:inline-block">
                             {content.contact.addressHe}, {content.contact.city}
                         </span>
+                        <OpenStatus className="header-open hidden lg:inline-flex" />
                     </div>
 
                     <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">

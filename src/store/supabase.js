@@ -22,13 +22,66 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export const PRODUCT_BUCKET = "product-images";
 
-/** Upload a product photo and return its public URL. */
+/**
+ * Downscale + re-encode an image to WebP in the browser so uploads stay
+ * small and the board loads fast on mobile. Returns a Blob, or null if the
+ * file can't/shouldn't be processed (caller then uploads the original).
+ */
+async function compressImage(file, maxDim = 1600, quality = 0.82) {
+    // Animated GIFs would lose their animation if flattened — leave as-is.
+    if (!file.type.startsWith("image/") || file.type === "image/gif")
+        return null;
+
+    let bitmap;
+    try {
+        bitmap = await createImageBitmap(file);
+    } catch {
+        return null;
+    }
+
+    const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close?.();
+
+    return new Promise((resolve) =>
+        canvas.toBlob((b) => resolve(b), "image/webp", quality),
+    );
+}
+
+/** Upload a product photo (compressed when possible) and return its public URL. */
 export async function uploadProductImage(file) {
-    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    let body = file;
+    let ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    let contentType = file.type || "image/jpeg";
+
+    try {
+        const compressed = await compressImage(file);
+        // Only use the compressed version if it actually saved bytes.
+        if (compressed && compressed.size > 0 && compressed.size < file.size) {
+            body = compressed;
+            ext = "webp";
+            contentType = "image/webp";
+        }
+    } catch {
+        // Fall back to the original file on any encoding error.
+    }
+
     const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage
         .from(PRODUCT_BUCKET)
-        .upload(path, file, { cacheControl: "31536000", upsert: false });
+        .upload(path, body, {
+            cacheControl: "31536000",
+            upsert: false,
+            contentType,
+        });
     if (error) throw error;
     const { data } = supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path);
     return data.publicUrl;
