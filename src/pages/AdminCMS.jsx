@@ -9,7 +9,7 @@ import {
     pct,
     splitSpec,
     joinSpec,
-    ICON_GROUPS,
+    ICON_OPTIONS,
 } from "../data/content.js";
 import Brand from "../components/Brand.jsx";
 import SiteEditor from "./SiteEditor.jsx";
@@ -129,14 +129,10 @@ function DealEditor({ deal, onChange, onRemove }) {
                                     onChange({ icon: e.target.value })
                                 }
                             >
-                                {ICON_GROUPS.map((g) => (
-                                    <optgroup key={g.letter} label={g.letter}>
-                                        {g.items.map((it) => (
-                                            <option key={it.key} value={it.key}>
-                                                {it.label}
-                                            </option>
-                                        ))}
-                                    </optgroup>
+                                {ICON_OPTIONS.map((it) => (
+                                    <option key={it.key} value={it.key}>
+                                        {it.label}
+                                    </option>
                                 ))}
                             </select>
                             <span className="icon-preview" title={deal.icon}>
