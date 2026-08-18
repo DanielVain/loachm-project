@@ -163,24 +163,34 @@ body {
 }
 
 /* ── Ticker ── */
+/* Left-to-right motion: start shifted left by exactly one copy, slide to 0.
+   Because every copy is identical and spaced uniformly, the end frame is
+   pixel-identical to the start — so it loops seamlessly with no empty gap. */
 @keyframes ticker {
     from {
-        transform: translateX(0);
+        transform: translateX(calc(-1 * var(--ticker-shift, 0px)));
     }
     to {
-        transform: translateX(-50%);
+        transform: translateX(0);
     }
 }
 .ticker-track {
     display: flex;
     width: max-content;
-    /* Own LTR layout so the two looping copies tile predictably; the leftward
-       animation then reads as natural right-to-left motion for the Hebrew. */
+    /* LTR track so the copies tile predictably left → right. */
     direction: ltr;
-    animation: ticker 42s linear infinite;
+    animation: ticker var(--ticker-duration, 30s) linear infinite;
+    will-change: transform;
 }
-.ticker-track:hover {
+.ticker-track:hover,
+.ticker-track.is-paused {
     animation-play-state: paused;
+}
+/* Respect users who prefer less motion — hold the strip still. */
+@media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+        animation: none;
+    }
 }
 
 /* ── Hero scanlines ── */
