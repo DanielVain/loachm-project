@@ -174,6 +174,9 @@ body {
 .ticker-track {
     display: flex;
     width: max-content;
+    /* Own LTR layout so the two looping copies tile predictably; the leftward
+       animation then reads as natural right-to-left motion for the Hebrew. */
+    direction: ltr;
     animation: ticker 42s linear infinite;
 }
 .ticker-track:hover {
