@@ -7,18 +7,21 @@ import React, {
 import { useContent } from "../store/ContentContext.jsx";
 
 const SPEED = 40; // px per second — a slow, readable crawl
+const GAP_VW = 0.3; // gap between repeats, as a fraction of the viewport width
 
 /**
  * Promo marquee (dark terminal strip).
  *
- * The full promo strip repeats with a fixed ~30%-of-viewport gap between copies,
- * sliding slowly left-to-right forever. We render just enough copies to overflow
- * the screen and animate by exactly one copy's measured width (content + gap),
- * so the loop point is pixel-identical — seamless, no jump.
+ * The promo strip repeats with a ~30%-of-viewport gap between copies, sliding
+ * slowly left-to-right forever. The items are repeated enough times that each
+ * copy's text block is at least as wide as the screen — so the viewport is full
+ * of text on the very first frame (no empty "sliding-in-from-the-left" start),
+ * and the gap only passes through periodically. The loop shifts by exactly one
+ * copy width, so it's seamless.
  *
- * Performance: only `transform` is animated (compositor thread — no main-thread
- * work / no layout / no repaint), the animation is paused when the strip scrolls
- * off-screen, resize measuring is rAF-debounced, and it honors reduced-motion.
+ * Performance: only `transform` animates (compositor thread — no layout/paint),
+ * the animation pauses when the strip scrolls off-screen, resize measuring is
+ * rAF-debounced, and it honors prefers-reduced-motion.
  */
 export default function Ticker() {
     const { content } = useContent();
@@ -26,17 +29,24 @@ export default function Ticker() {
 
     const wrapRef = useRef(null);
     const copyRef = useRef(null);
+    const [reps, setReps] = useState(1);
     const [copies, setCopies] = useState(2);
     const [shift, setShift] = useState(0);
     const [active, setActive] = useState(true);
 
-    // Measure one copy's width (content + gap) → drives copy count + loop shift.
     useLayoutEffect(() => {
         let raf = 0;
         const measure = () => {
             const cw = wrapRef.current?.clientWidth || 0;
             const copyW = copyRef.current?.offsetWidth || 0;
             if (!cw || !copyW) return;
+            const blockW = Math.max(1, copyW - GAP_VW * cw); // text only, no gap
+            const single = blockW / reps; // width of one items set
+            const needReps = Math.max(1, Math.ceil(cw / single)); // fill viewport
+            if (needReps !== reps) {
+                setReps(needReps); // re-measure with the new repeat count
+                return;
+            }
             setShift(copyW);
             setCopies(Math.max(2, Math.ceil(cw / copyW) + 1));
         };
@@ -50,9 +60,9 @@ export default function Ticker() {
             cancelAnimationFrame(raf);
             window.removeEventListener("resize", onResize);
         };
-    }, [items]);
+    }, [items, reps]);
 
-    // Pause the animation while the strip isn't visible (no compositor work).
+    // Pause while the strip isn't visible (no compositor work).
     useEffect(() => {
         const el = wrapRef.current;
         if (!el || typeof IntersectionObserver === "undefined") return;
@@ -65,15 +75,17 @@ export default function Ticker() {
         <div
             ref={ref}
             className="flex items-center gap-7 whitespace-nowrap"
-            style={{ paddingInlineEnd: "30vw" }} // the gap between repeats
+            style={{ paddingInlineEnd: `${GAP_VW * 100}vw` }} // the gap
             aria-hidden={hidden || undefined}
         >
-            {items.map((t, i) => (
-                <React.Fragment key={i}>
-                    <span>{t}</span>
-                    <span className="opacity-30">●</span>
-                </React.Fragment>
-            ))}
+            {Array.from({ length: reps }).map((_, r) =>
+                items.map((t, i) => (
+                    <React.Fragment key={`${r}-${i}`}>
+                        <span>{t}</span>
+                        <span className="opacity-30">●</span>
+                    </React.Fragment>
+                )),
+            )}
         </div>
     );
 
