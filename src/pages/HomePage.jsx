@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useContent } from "../store/ContentContext.jsx";
 import Ticker from "../components/Ticker.jsx";
 import Header from "../components/Header.jsx";
 import Hero from "../components/Hero.jsx";
@@ -6,6 +7,7 @@ import NonstopFeature from "../components/NonstopFeature.jsx";
 import DealsGrid from "../components/DealsGrid.jsx";
 import ExtrasGrid from "../components/ExtrasGrid.jsx";
 import VisitContact from "../components/VisitContact.jsx";
+import PageSkeleton from "../components/PageSkeleton.jsx";
 
 const prefersDark = () =>
     typeof window !== "undefined" &&
@@ -25,6 +27,7 @@ const initialDark = () => {
 
 /** The public storefront. */
 export default function HomePage() {
+    const { loading } = useContent();
     const [dark, setDark] = useState(initialDark);
 
     useEffect(() => {
@@ -64,11 +67,17 @@ export default function HomePage() {
         <div className="min-h-screen">
             <Ticker />
             <Header dark={dark} onToggleTheme={toggleTheme} />
-            <Hero />
-            <NonstopFeature />
-            <DealsGrid />
-            <ExtrasGrid />
-            <VisitContact />
+            {loading ? (
+                <PageSkeleton />
+            ) : (
+                <div className="content-fade-in">
+                    <Hero />
+                    <NonstopFeature />
+                    <DealsGrid />
+                    <ExtrasGrid />
+                    <VisitContact />
+                </div>
+            )}
         </div>
     );
 }
