@@ -12,16 +12,14 @@ const GAP_VW = 0.3; // gap between repeats, as a fraction of the viewport width
 /**
  * Promo marquee (dark terminal strip).
  *
- * The promo strip repeats with a ~30%-of-viewport gap between copies, sliding
- * slowly left-to-right forever. The items are repeated enough times that each
- * copy's text block is at least as wide as the screen — so the viewport is full
- * of text on the very first frame (no empty "sliding-in-from-the-left" start),
- * and the gap only passes through periodically. The loop shifts by exactly one
- * copy width, so it's seamless.
+ * Two identical copies animated by translateX(-50% → 0) — left-to-right, looping
+ * seamlessly (plain-percentage keyframe, so it works in Safari too). The items
+ * are repeated enough times that each copy's text block is at least as wide as
+ * the screen, so the strip is full of text on the first frame (no empty start),
+ * with a ~30%-of-viewport gap between repeats.
  *
- * Performance: only `transform` animates (compositor thread — no layout/paint),
- * the animation pauses when the strip scrolls off-screen, resize measuring is
- * rAF-debounced, and it honors prefers-reduced-motion.
+ * Performance: only `transform` animates (compositor thread), it pauses when
+ * scrolled off-screen, resize is rAF-debounced, and it honors reduced-motion.
  */
 export default function Ticker() {
     const { content } = useContent();
@@ -30,8 +28,7 @@ export default function Ticker() {
     const wrapRef = useRef(null);
     const copyRef = useRef(null);
     const [reps, setReps] = useState(1);
-    const [copies, setCopies] = useState(2);
-    const [shift, setShift] = useState(0);
+    const [dur, setDur] = useState(30);
     const [active, setActive] = useState(true);
 
     useLayoutEffect(() => {
@@ -47,8 +44,7 @@ export default function Ticker() {
                 setReps(needReps); // re-measure with the new repeat count
                 return;
             }
-            setShift(copyW);
-            setCopies(Math.max(2, Math.ceil(cw / copyW) + 1));
+            setDur(Math.max(12, Math.round(copyW / SPEED)));
         };
         measure();
         const onResize = () => {
@@ -89,8 +85,6 @@ export default function Ticker() {
         </div>
     );
 
-    const duration = shift ? Math.max(18, Math.round(shift / SPEED)) : 30;
-
     return (
         <div
             ref={wrapRef}
@@ -104,13 +98,11 @@ export default function Ticker() {
                     }`}
                     style={{
                         color: "var(--green-bg)",
-                        "--ticker-shift": `${shift}px`,
-                        "--ticker-duration": `${duration}s`,
+                        animationDuration: `${dur}s`,
                     }}
                 >
-                    {Array.from({ length: copies }).map((_, i) =>
-                        copy(i > 0, i === 0 ? copyRef : null),
-                    )}
+                    {copy(false, copyRef)}
+                    {copy(true, null)}
                 </div>
             </div>
         </div>
