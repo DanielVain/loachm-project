@@ -1,17 +1,23 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import { useContent } from "../store/ContentContext.jsx";
 
 /**
  * Scrolling marquee of promo strings (dark terminal strip).
  *
  * The track is two identical halves animated by translateX(-50%), which loops
- * seamlessly only when each half is at least as wide as the viewport. So we
- * repeat the promo items enough times (measured against the container width) to
- * guarantee no gap on any screen — the marquee then runs infinitely, gapless.
+ * seamlessly only when each half is at least as wide as the viewport — so we
+ * repeat the items enough times (measured against the container) to guarantee
+ * no gap on any screen, and the marquee runs infinitely without flashing back.
+ *
+ * The track lays out LTR for predictable tiling, so the source list is reversed
+ * to keep the Hebrew reading order correct as it scrolls right-to-left. Each
+ * half carries only a trailing gap (pe-7) so the seam spacing matches the gap
+ * between items and translateX(-50%) lands exactly on the loop point.
  */
 export default function Ticker() {
     const { content } = useContent();
-    const items = content.ticker;
+    // Reverse so items read in natural order under the LTR track (see above).
+    const items = [...content.ticker].reverse();
 
     const wrapRef = useRef(null);
     const halfRef = useRef(null);
@@ -31,15 +37,12 @@ export default function Ticker() {
         measure();
         window.addEventListener("resize", measure);
         return () => window.removeEventListener("resize", measure);
-    }, [items, reps]);
-
-    // Restart cleanly if the item list changes.
-    useEffect(() => setReps(1), [items]);
+    }, [content.ticker, reps]);
 
     const half = (hidden, ref) => (
         <div
             ref={ref}
-            className="flex items-center gap-7 px-7 whitespace-nowrap"
+            className="flex items-center gap-7 pe-7 whitespace-nowrap"
             aria-hidden={hidden || undefined}
         >
             {Array.from({ length: reps }).map((_, r) =>
