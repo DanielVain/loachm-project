@@ -163,37 +163,21 @@ body {
 }
 
 /* ── Ticker ── */
-/* Left-to-right motion with two identical copies: start shifted left by one
-   copy (-50% of the track), slide to 0. The end frame is pixel-identical to the
-   start, so it loops seamlessly. Plain percentages only — no CSS variables in
-   the keyframe (Safari mis-animates those). Speed is set via inline duration. */
 @keyframes ticker {
     from {
-        transform: translateX(-50%);
+        transform: translateX(0);
     }
     to {
-        transform: translateX(0);
+        transform: translateX(-50%);
     }
 }
 .ticker-track {
     display: flex;
     width: max-content;
-    /* LTR track so the two copies tile predictably left → right. */
-    direction: ltr;
-    animation-name: ticker;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    will-change: transform;
+    animation: ticker 42s linear infinite;
 }
-.ticker-track:hover,
-.ticker-track.is-paused {
+.ticker-track:hover {
     animation-play-state: paused;
-}
-/* Respect users who prefer less motion — hold the strip still. */
-@media (prefers-reduced-motion: reduce) {
-    .ticker-track {
-        animation: none;
-    }
 }
 
 /* ── Hero scanlines ── */
