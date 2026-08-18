@@ -162,13 +162,13 @@ body {
     font-size: 0.7rem;
 }
 
-/* ── Ticker ── */
+/* ── Ticker ── (reversed direction: moves left-to-right) */
 @keyframes ticker {
     from {
-        transform: translateX(0);
+        transform: translateX(-50%);
     }
     to {
-        transform: translateX(-50%);
+        transform: translateX(0);
     }
 }
 .ticker-track {
