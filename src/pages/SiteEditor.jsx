@@ -173,10 +173,34 @@ function IconSelect({ label, value, onChange }) {
     );
 }
 
-function Card({ title, children }) {
+function Card({ title, desc, children }) {
     return (
-        <section className="t-card border t-rule p-4 md:p-5 flex flex-col gap-4">
-            <h2 className="font-display text-lg md:text-xl">{title}</h2>
+        <section className="cms-section t-card border t-rule">
+            <div className="cms-section-head">
+                <h3 className="font-display text-base md:text-lg">{title}</h3>
+                {desc && (
+                    <p className="uppercase-mono t-mute mt-1 leading-relaxed">
+                        {desc}
+                    </p>
+                )}
+            </div>
+            <div className="cms-section-body flex flex-col gap-4">
+                {children}
+            </div>
+        </section>
+    );
+}
+
+/** A titled group of cards — echoes the storefront's "// kicker + heading". */
+function Group({ kicker, title, children }) {
+    return (
+        <section className="flex flex-col gap-4">
+            <div className="cms-group-head">
+                <div className="uppercase-mono t-green">{kicker}</div>
+                <h2 className="font-display text-2xl md:text-3xl mt-1">
+                    {title}
+                </h2>
+            </div>
             {children}
         </section>
     );
@@ -273,9 +297,21 @@ export default function SiteEditor() {
         });
 
     return (
-        <div className="flex flex-col gap-6 max-w-3xl">
-            {/* ── Layout / section arrangement ── */}
-            <Card title="פריסת העמוד — סידור מקטעים">
+        <div className="cms-editor flex flex-col gap-10 max-w-3xl">
+            <header className="cms-page-head">
+                <div className="uppercase-mono t-green">// עריכת האתר</div>
+                <h1 className="font-display text-3xl md:text-4xl mt-1">
+                    תוכן האתר
+                </h1>
+                <p className="t-mute text-sm mt-2 leading-relaxed">
+                    כל שינוי נשמר בענן ומופיע מיד אצל המבקרים. הכרטיסים מסודרים
+                    לפי סדר הופעתם בעמוד — מלמעלה למטה.
+                </p>
+            </header>
+
+            <Group kicker="// מבנה העמוד" title="סידור מקטעים">
+                {/* ── Layout / section arrangement ── */}
+                <Card title="פריסת העמוד — סידור מקטעים">
                 <p className="uppercase-mono t-mute">
                     שנו את הסדר עם החצים או הסתירו מקטעים. התצוגה המקדימה מתעדכנת
                     מיד — כך ייראה סדר העמוד ללקוח (ההירו קבוע תמיד למעלה).
@@ -365,8 +401,11 @@ export default function SiteEditor() {
                 </div>
             </Card>
 
-            {/* ── Hero text ── */}
-            <Card title="טקסט ההירו">
+            </Group>
+
+            <Group kicker="// ראש העמוד" title="החלק העליון">
+                {/* ── Hero text ── */}
+                <Card title="טקסט ההירו">
                 <p className="uppercase-mono t-mute">
                     כל הטקסטים בראש העמוד ניתנים לעריכה — חוץ מהלוגו הגדול
                     (לוחM), שנשאר קבוע.
@@ -583,8 +622,11 @@ export default function SiteEditor() {
                 </div>
             </Card>
 
-            {/* ── Opening hours ── */}
-            <Card title="שעות פתיחה">
+            </Group>
+
+            <Group kicker="// תוכן ופרטים" title="מקטעים, שעות וכותרות">
+                {/* ── Opening hours ── */}
+                <Card title="שעות פתיחה">
                 <div className="flex flex-col gap-1">
                     {WEEKDAYS_HE.map((label, i) => {
                         const h = hours[i] || {};
@@ -851,6 +893,8 @@ export default function SiteEditor() {
                     onChange={(v) => setUi("footerNote", v)}
                 />
             </Card>
+
+            </Group>
 
             <p className="uppercase-mono t-mute">
                 השינויים נשמרים בענן ומופיעים מיד באתר · הלוגו הגדול (לוחM)

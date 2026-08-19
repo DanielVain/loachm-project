@@ -632,6 +632,37 @@ body {
     background-color: var(--bg);
     color: var(--text);
 }
+
+/* Site editor: page header, grouped sections, card headers ───────── */
+.cms-page-head {
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--rule);
+}
+.cms-group-head {
+    padding-bottom: 0.25rem;
+    border-bottom: 2px solid var(--green-bg);
+    margin-bottom: 0.25rem;
+    align-self: flex-start;
+    min-width: 40%;
+}
+.cms-section {
+    border-radius: 4px;
+    overflow: hidden;
+}
+.cms-section-head {
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-2);
+    border-bottom: 1px solid var(--rule);
+    border-inline-start: 3px solid var(--green-bg);
+}
+.cms-section-body {
+    padding: 1rem;
+}
+@media (min-width: 768px) {
+    .cms-section-body {
+        padding: 1.25rem;
+    }
+}
 .cms-input {
     width: 100%;
     background-color: var(--card);
