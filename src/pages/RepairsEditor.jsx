@@ -164,7 +164,7 @@ function RepairCard({ repair, onChange, onRemove, onAddMovement, onRemoveMovemen
                         onChange={(e) => onChange({ issue: e.target.value })}
                     />
                 </Field>
-                <Field label="מחיר (₪)">
+                <Field label="הצעת מחיר (₪)">
                     <input
                         type="number"
                         dir="ltr"
