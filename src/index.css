@@ -455,36 +455,52 @@ body {
     display: block;
 }
 
-/* ── Cycling brand-logo showcase under the hero title ── */
-.brand-logos {
-    margin-top: 1.75rem;
+/* ── Centered brand showcase under the hero (all logos side by side) ── */
+.brand-strip {
+    margin-top: 3rem;
+    text-align: center;
+}
+.brand-strip-title {
+    font-family: "Archivo Black", "Heebo", sans-serif;
+    font-size: clamp(1.5rem, 1rem + 2.2vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 1.75rem;
+}
+.brand-strip-logos {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem 1.75rem;
+}
+.brand-logo-item {
+    height: 78px;
+    width: 168px;
     display: flex;
     align-items: center;
-    gap: 0.9rem;
-    flex-wrap: wrap;
-}
-.brand-logo-frame {
-    position: relative;
-    width: 150px;
-    height: 52px;
+    justify-content: center;
+    padding: 14px 20px;
     border: 1px solid var(--rule);
     background-color: var(--card);
-    border-radius: 4px;
-    overflow: hidden;
-    flex-shrink: 0;
+    border-radius: 8px;
+    transition:
+        transform 0.2s ease,
+        border-color 0.2s ease;
 }
-.brand-logo {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    max-width: 76%;
-    max-height: 66%;
+.brand-logo-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--green-bg);
+}
+.brand-logo-item img {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    opacity: 0;
-    transition: opacity 0.6s ease;
 }
-.brand-logo.is-active {
-    opacity: 1;
+@media (max-width: 640px) {
+    .brand-logo-item {
+        height: 64px;
+        width: 44%;
+    }
 }
 
 /* ── Optional photo on "also on the shelf" items ── */
@@ -618,6 +634,38 @@ body {
     border-radius: 9999px;
     display: inline-block;
     flex-shrink: 0;
+}
+
+/* ── Repair movement timeline ── */
+.repair-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.repair-move {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    position: relative;
+}
+.repair-move:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 4px;
+    top: 14px;
+    bottom: -10px;
+    width: 1px;
+    background-color: var(--rule);
+}
+.repair-move-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    margin-top: 5px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 /* ── Board: 2-row infinite auto-scroll (native scroll + JS) ── */

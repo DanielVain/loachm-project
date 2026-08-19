@@ -197,6 +197,7 @@ export const DEFAULT_CONTENT = {
     },
     /* Section headings / labels — all editable in the CMS "site content" tab. */
     ui: {
+        brandsTitle: "המותגים שאנחנו מוכרים",
         dealsKicker: "// במלאי עכשיו",
         dealsTitle: "הלוח.",
         dealsNote: "המחירים כוללים מע״מ. הכמויות מוגבלות לכל לקוח.",

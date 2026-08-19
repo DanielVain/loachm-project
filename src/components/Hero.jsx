@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
-import TrustBar from "./TrustBar.jsx";
 import BrandLogos from "./BrandLogos.jsx";
 
 /** Live HH:MM:SS clock for the "system online" status line. */
@@ -66,8 +65,6 @@ export default function Hero() {
                             <span className="t-green font-bold">NONSTOP</span>{" "}
                             היחיד בישראל. במלאי. יוצא מהדלת עוד היום.
                         </p>
-
-                        <BrandLogos />
                     </div>
 
                     <div className="col-span-12 md:col-span-4">
@@ -108,7 +105,7 @@ export default function Hero() {
                     </div>
                 </div>
 
-                <TrustBar />
+                <BrandLogos />
             </div>
         </section>
     );

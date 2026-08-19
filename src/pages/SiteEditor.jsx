@@ -292,8 +292,13 @@ export default function SiteEditor() {
                     />
                 )}
 
+                <Text
+                    label="כותרת אזור המותגים"
+                    value={ui.brandsTitle}
+                    onChange={(v) => setUi("brandsTitle", v)}
+                />
                 <div className="uppercase-mono t-mute mt-2">
-                    לוגו מותגים (מתחלפים מתחת לכותרת)
+                    לוגו מותגים (מוצגים זה לצד זה מתחת להירו)
                 </div>
                 <div className="flex flex-col gap-3">
                     {brandLogos.map((l, i) => (
