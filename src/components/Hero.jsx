@@ -34,7 +34,7 @@ function HeroFrame({ images, alt }) {
     if (images.length === 1) {
         return (
             <div className="hero-frame hero-frame-tall">
-                <Img src={images[0]} alt={alt} />
+                <Img src={images[0]} alt={alt} eager />
             </div>
         );
     }

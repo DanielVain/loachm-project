@@ -62,7 +62,7 @@ export default function DealModal({ deal, onClose }) {
 
                 {deal.image ? (
                     <div className="deal-modal-photo">
-                        <Img src={deal.image} alt={deal.name} />
+                        <Img src={deal.image} alt={deal.name} eager />
                     </div>
                 ) : (
                     <div className="deal-modal-photo deal-modal-photo--icon">
