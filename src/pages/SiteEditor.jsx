@@ -1,8 +1,113 @@
-import { Plus, X } from "lucide-react";
+import { useState } from "react";
+import {
+    Plus,
+    X,
+    Trash2,
+    ImagePlus,
+    Loader2,
+    Image as ImageIcon,
+} from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { ICON_OPTIONS, iconFor, WEEKDAYS_HE } from "../data/content.js";
+import { uploadProductImage } from "../store/supabase.js";
+import { ICON_OPTIONS, iconFor, WEEKDAYS_HE, newId } from "../data/content.js";
+
+const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
 
 /* ── Small building blocks ─────────────────────────────────────── */
+
+/** Thumbnail + upload/remove control for a single image URL. */
+function ImageField({ label, value, onChange, hint }) {
+    const [uploading, setUploading] = useState(false);
+    const [err, setErr] = useState("");
+
+    async function pick(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (file.size > MAX_IMAGE_BYTES) {
+            setErr("התמונה גדולה מדי (מקסימום 5MB).");
+            return;
+        }
+        setErr("");
+        setUploading(true);
+        try {
+            const url = await uploadProductImage(file);
+            onChange(url);
+        } catch {
+            setErr("העלאת התמונה נכשלה.");
+        } finally {
+            setUploading(false);
+        }
+    }
+
+    return (
+        <div className="flex flex-col gap-1">
+            {label && <span className="uppercase-mono t-mute">{label}</span>}
+            <div className="flex items-center gap-3">
+                <div className="cms-thumb">
+                    {uploading ? (
+                        <Loader2 className="w-5 h-5 t-mute animate-spin" />
+                    ) : value ? (
+                        <img src={value} alt="" />
+                    ) : (
+                        <ImageIcon className="w-5 h-5 t-mute" strokeWidth={1.5} />
+                    )}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <label className="cms-upload uppercase-mono">
+                        <ImagePlus className="w-3 h-3" strokeWidth={2.5} />
+                        {value ? "החלפה" : "העלאה"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={pick}
+                        />
+                    </label>
+                    {value && (
+                        <button
+                            type="button"
+                            onClick={() => onChange("")}
+                            className="uppercase-mono t-mute h-green flex items-center gap-1"
+                        >
+                            <X className="w-3 h-3" /> הסר תמונה
+                        </button>
+                    )}
+                    {hint && (
+                        <span className="text-[0.7rem] t-mute">{hint}</span>
+                    )}
+                </div>
+            </div>
+            {err && (
+                <span className="text-xs" style={{ color: "#e5484d" }}>
+                    {err}
+                </span>
+            )}
+        </div>
+    );
+}
+
+/** Color picker + hex input pair. */
+function ColorField({ label, value, onChange }) {
+    return (
+        <label className="flex flex-col gap-1">
+            <span className="uppercase-mono t-mute">{label}</span>
+            <div className="flex items-center gap-2">
+                <input
+                    type="color"
+                    className="cms-color"
+                    value={value || "#000000"}
+                    onChange={(e) => onChange(e.target.value)}
+                />
+                <input
+                    className="cms-input flex-1"
+                    dir="ltr"
+                    value={value || ""}
+                    onChange={(e) => onChange(e.target.value)}
+                />
+            </div>
+        </label>
+    );
+}
 
 function Text({ label, value, onChange, placeholder }) {
     return (
@@ -70,12 +175,29 @@ function Card({ title, children }) {
 
 export default function SiteEditor() {
     const { content, updateSite } = useContent();
-    const { ui, featured, ticker, extras, weeklyDrop, hours } = content;
+    const { ui, featured, ticker, extras, weeklyDrop, hours, layout, brandLogos, nonstopColors } =
+        content;
 
     const setHour = (i, patch) =>
         updateSite({
             hours: hours.map((h, j) => (j === i ? { ...h, ...patch } : h)),
         });
+
+    const setLayout = (patch) => updateSite({ layout: { ...layout, ...patch } });
+    const setNsColor = (key, val) =>
+        updateSite({ nonstopColors: { ...nonstopColors, [key]: val } });
+    const setLogo = (i, patch) =>
+        updateSite({
+            brandLogos: brandLogos.map((l, j) =>
+                j === i ? { ...l, ...patch } : l,
+            ),
+        });
+    const addLogo = () =>
+        updateSite({
+            brandLogos: [...brandLogos, { id: newId(), name: "", image: "" }],
+        });
+    const removeLogo = (i) =>
+        updateSite({ brandLogos: brandLogos.filter((_, j) => j !== i) });
 
     const setUi = (key, val) => updateSite({ ui: { ...ui, [key]: val } });
     const setWeekly = (key, val) =>
@@ -140,6 +262,74 @@ export default function SiteEditor() {
                     >
                         <Plus className="w-3 h-3" strokeWidth={2.5} />
                         הוסף שורה
+                    </button>
+                </div>
+            </Card>
+
+            {/* ── Hero layout ── */}
+            <Card title="פריסת ההירו (Layout)">
+                <label className="flex flex-col gap-1">
+                    <span className="uppercase-mono t-mute">
+                        בתיבה שליד הכותרת מוצג
+                    </span>
+                    <select
+                        className="cms-input"
+                        value={layout.heroPanel}
+                        onChange={(e) =>
+                            setLayout({ heroPanel: e.target.value })
+                        }
+                    >
+                        <option value="image">מסגרת תמונה</option>
+                        <option value="weeklyDrop">תיבת מבצע שבועי</option>
+                    </select>
+                </label>
+                {layout.heroPanel === "image" && (
+                    <ImageField
+                        label="תמונת ההירו"
+                        value={layout.heroImage}
+                        onChange={(url) => setLayout({ heroImage: url })}
+                        hint="אם ריק — תוצג תיבת המבצע השבועי"
+                    />
+                )}
+
+                <div className="uppercase-mono t-mute mt-2">
+                    לוגו מותגים (מתחלפים מתחת לכותרת)
+                </div>
+                <div className="flex flex-col gap-3">
+                    {brandLogos.map((l, i) => (
+                        <div
+                            key={l.id}
+                            className="flex items-center gap-3 border-t t-rule-soft pt-3 first:border-t-0 first:pt-0"
+                        >
+                            <ImageField
+                                value={l.image}
+                                onChange={(url) => setLogo(i, { image: url })}
+                            />
+                            <input
+                                className="cms-input flex-1"
+                                placeholder="שם המותג"
+                                value={l.name}
+                                onChange={(e) =>
+                                    setLogo(i, { name: e.target.value })
+                                }
+                            />
+                            <button
+                                type="button"
+                                aria-label="הסר לוגו"
+                                className="t-mute h-green"
+                                onClick={() => removeLogo(i)}
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                    <button
+                        type="button"
+                        className="cms-add-row uppercase-mono"
+                        onClick={addLogo}
+                    >
+                        <Plus className="w-3 h-3" strokeWidth={2.5} />
+                        הוסף לוגו
                     </button>
                 </div>
             </Card>
@@ -245,8 +435,39 @@ export default function SiteEditor() {
                 </p>
             </Card>
 
-            {/* ── NONSTOP feature ── */}
-            <Card title="מקטע NONSTOP">
+            {/* ── NONSTOP design ── */}
+            <Card title="עיצוב מקטע NONSTOP">
+                <label className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={layout.showNonstop}
+                        onChange={(e) =>
+                            setLayout({ showNonstop: e.target.checked })
+                        }
+                    />
+                    <span className="uppercase-mono">הצג את מקטע NONSTOP</span>
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <ColorField
+                        label="צבע רקע"
+                        value={nonstopColors.bg}
+                        onChange={(v) => setNsColor("bg", v)}
+                    />
+                    <ColorField
+                        label="צבע הדגשה"
+                        value={nonstopColors.accent}
+                        onChange={(v) => setNsColor("accent", v)}
+                    />
+                    <ColorField
+                        label="צבע כותרת NONSTOP"
+                        value={nonstopColors.title}
+                        onChange={(v) => setNsColor("title", v)}
+                    />
+                </div>
+            </Card>
+
+            {/* ── NONSTOP feature (text) ── */}
+            <Card title="מקטע NONSTOP — טקסט">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <Text
                         label="תווית עליונה"
@@ -336,6 +557,14 @@ export default function SiteEditor() {
                                 setExtra(i, { from: Number(v) || 0 })
                             }
                         />
+                        <div className="md:col-span-2">
+                            <ImageField
+                                label="תמונה (אופציונלי)"
+                                value={e.image}
+                                onChange={(url) => setExtra(i, { image: url })}
+                                hint="אם ריק — יוצג אייקון במקום"
+                            />
+                        </div>
                     </div>
                 ))}
             </Card>

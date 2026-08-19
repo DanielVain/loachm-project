@@ -32,13 +32,23 @@ export default function ExtrasGrid() {
                                 key={e.name}
                                 className="t-card border t-rule p-5 flex items-start gap-4 deal-card"
                             >
-                                <div className="t-green-bg p-3 flex-shrink-0">
-                                    <Icon
-                                        className="w-[22px] h-[22px]"
-                                        strokeWidth={1.6}
-                                        style={{ color: "#0a0a0a" }}
-                                    />
-                                </div>
+                                {e.image ? (
+                                    <div className="extra-photo flex-shrink-0">
+                                        <img
+                                            src={e.image}
+                                            alt={e.name}
+                                            loading="lazy"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="t-green-bg p-3 flex-shrink-0">
+                                        <Icon
+                                            className="w-[22px] h-[22px]"
+                                            strokeWidth={1.6}
+                                            style={{ color: "#0a0a0a" }}
+                                        />
+                                    </div>
+                                )}
                                 <div className="flex-1">
                                     <div
                                         className="font-display text-lg md:text-xl mb-1"

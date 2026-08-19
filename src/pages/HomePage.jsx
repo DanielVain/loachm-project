@@ -27,7 +27,7 @@ const initialDark = () => {
 
 /** The public storefront. */
 export default function HomePage() {
-    const { loading } = useContent();
+    const { content, loading } = useContent();
     const [dark, setDark] = useState(initialDark);
 
     useEffect(() => {
@@ -72,7 +72,7 @@ export default function HomePage() {
             ) : (
                 <div className="content-fade-in">
                     <Hero />
-                    <NonstopFeature />
+                    {content.layout.showNonstop && <NonstopFeature />}
                     <DealsGrid />
                     <ExtrasGrid />
                     <VisitContact />

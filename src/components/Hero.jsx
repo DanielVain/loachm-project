@@ -3,6 +3,7 @@ import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
 import TrustBar from "./TrustBar.jsx";
+import BrandLogos from "./BrandLogos.jsx";
 
 /** Live HH:MM:SS clock for the "system online" status line. */
 function useClock() {
@@ -65,29 +66,45 @@ export default function Hero() {
                             <span className="t-green font-bold">NONSTOP</span>{" "}
                             היחיד בישראל. במלאי. יוצא מהדלת עוד היום.
                         </p>
+
+                        <BrandLogos />
                     </div>
 
                     <div className="col-span-12 md:col-span-4">
-                        <div className="weekly-drop-box p-5 md:p-6">
-                            <div className="uppercase-mono mb-3 flex items-center gap-2 weekly-drop-ink">
-                                <Flame className="w-3 h-3" strokeWidth={2.5} />
-                                {content.weeklyDrop.title}
+                        {content.layout.heroPanel === "image" &&
+                        content.layout.heroImage ? (
+                            <div className="hero-frame">
+                                <img
+                                    src={content.layout.heroImage}
+                                    alt=""
+                                    loading="lazy"
+                                />
                             </div>
-                            <div className="font-display text-6xl md:text-7xl mb-1 leading-none weekly-drop-pct">
-                                −{content.weeklyDrop.pct}%
+                        ) : (
+                            <div className="weekly-drop-box p-5 md:p-6">
+                                <div className="uppercase-mono mb-3 flex items-center gap-2 weekly-drop-ink">
+                                    <Flame
+                                        className="w-3 h-3"
+                                        strokeWidth={2.5}
+                                    />
+                                    {content.weeklyDrop.title}
+                                </div>
+                                <div className="font-display text-6xl md:text-7xl mb-1 leading-none weekly-drop-pct">
+                                    −{content.weeklyDrop.pct}%
+                                </div>
+                                <div className="text-sm mb-4 mt-2 weekly-drop-ink-soft">
+                                    {content.weeklyDrop.note}
+                                </div>
+                                <div className="weekly-drop-rule pt-3 flex items-center justify-between uppercase-mono weekly-drop-ink">
+                                    <span className="opacity-70">
+                                        {content.weeklyDrop.endsLabel}
+                                    </span>
+                                    <span className="font-bold">
+                                        {content.weeklyDrop.endsValue}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="text-sm mb-4 mt-2 weekly-drop-ink-soft">
-                                {content.weeklyDrop.note}
-                            </div>
-                            <div className="weekly-drop-rule pt-3 flex items-center justify-between uppercase-mono weekly-drop-ink">
-                                <span className="opacity-70">
-                                    {content.weeklyDrop.endsLabel}
-                                </span>
-                                <span className="font-bold">
-                                    {content.weeklyDrop.endsValue}
-                                </span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 

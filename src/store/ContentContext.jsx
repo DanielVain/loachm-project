@@ -137,6 +137,14 @@ export function ContentProvider({ children }) {
             ticker: site.ticker ?? DEFAULT_CONTENT.ticker,
             extras: site.extras ?? DEFAULT_CONTENT.extras,
             hours: Array.isArray(site.hours) ? site.hours : DEFAULT_CONTENT.hours,
+            layout: { ...DEFAULT_CONTENT.layout, ...(site.layout || {}) },
+            brandLogos: Array.isArray(site.brandLogos)
+                ? site.brandLogos
+                : DEFAULT_CONTENT.brandLogos,
+            nonstopColors: {
+                ...DEFAULT_CONTENT.nonstopColors,
+                ...(site.nonstopColors || {}),
+            },
             deals: deals || [],
         }),
         [site, deals],

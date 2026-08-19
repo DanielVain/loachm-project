@@ -175,6 +175,26 @@ export const DEFAULT_CONTENT = {
             { type: "לרכב", icon: "Zap", name: "מטען לרכב 45W", price: 89 },
         ],
     },
+    /* ── Layout / customization (managed in the CMS "layout" controls) ── */
+    layout: {
+        heroPanel: "image", // "image" (picture frame) | "weeklyDrop" (sale box)
+        heroImage: "", // URL of the hero picture-frame image
+        showNonstop: true, // show / hide the NONSTOP section
+    },
+    /* Cycling brand-logo strip under the hero title (images uploaded in CMS). */
+    brandLogos: [
+        { id: "bl1", name: "Apple", image: "" },
+        { id: "bl2", name: "Samsung", image: "" },
+        { id: "bl3", name: "Xiaomi", image: "" },
+        { id: "bl4", name: "JBL", image: "" },
+        { id: "bl5", name: "NONSTOP", image: "" },
+    ],
+    /* Editable colors for the NONSTOP section. */
+    nonstopColors: {
+        bg: "#0a1426",
+        accent: "#5cc6f5",
+        title: "#7cc9ff",
+    },
     /* Section headings / labels — all editable in the CMS "site content" tab. */
     ui: {
         dealsKicker: "// במלאי עכשיו",

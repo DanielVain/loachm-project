@@ -5,9 +5,18 @@ import { iconFor } from "../data/content.js";
 export default function NonstopFeature() {
     const { content } = useContent();
     const f = content.featured;
+    const c = content.nonstopColors;
 
     return (
-        <section id="nonstop" className="nonstop-section">
+        <section
+            id="nonstop"
+            className="nonstop-section"
+            style={{
+                "--ns-bg": c.bg,
+                "--ns-accent": c.accent,
+                "--ns-title": c.title,
+            }}
+        >
             {/* decorative blue glows */}
             <span className="nonstop-glow nonstop-glow--a" aria-hidden="true" />
             <span className="nonstop-glow nonstop-glow--b" aria-hidden="true" />

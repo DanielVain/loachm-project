@@ -295,13 +295,19 @@ body {
     overflow: hidden;
     isolation: isolate;
     color: #eaf2fb;
+    /* Base colour is editable in the CMS (--ns-bg); the overlays add depth. */
     background:
         radial-gradient(
             1200px 500px at 80% -10%,
-            rgba(56, 189, 248, 0.14),
+            rgba(120, 190, 255, 0.14),
             transparent 60%
         ),
-        linear-gradient(180deg, #0a1426 0%, #060b18 60%, #050912 100%);
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.03) 0%,
+            rgba(0, 0, 0, 0.35) 100%
+        ),
+        var(--ns-bg, #0a1426);
 }
 .nonstop-inner {
     position: relative;
@@ -320,30 +326,35 @@ body {
     height: 540px;
     top: -200px;
     right: -120px;
-    background: radial-gradient(circle, #22d3ee 0%, transparent 68%);
+    background: radial-gradient(
+        circle,
+        var(--ns-accent, #22d3ee) 0%,
+        transparent 68%
+    );
 }
 .nonstop-glow--b {
     width: 520px;
     height: 520px;
     bottom: -220px;
     left: -120px;
-    background: radial-gradient(circle, #3b82f6 0%, transparent 68%);
+    background: radial-gradient(
+        circle,
+        var(--ns-accent, #3b82f6) 0%,
+        transparent 68%
+    );
 }
 .nonstop-accent {
-    color: #5cc6f5;
+    color: var(--ns-accent, #5cc6f5);
 }
 .nonstop-accent-bar {
     display: inline-block;
-    background-color: #5cc6f5;
+    background-color: var(--ns-accent, #5cc6f5);
 }
 .nonstop-accent-text {
-    color: #5cc6f5;
+    color: var(--ns-accent, #5cc6f5);
 }
 .nonstop-wordmark {
-    background: linear-gradient(90deg, #93e2ff 0%, #38bdf8 45%, #2563eb 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--ns-title, #7cc9ff);
 }
 /* Blue-themed product tiles inside the NONSTOP panel */
 .nonstop-section .nonstop-tile {
@@ -351,9 +362,9 @@ body {
     background-color: rgba(120, 180, 255, 0.04);
 }
 .nonstop-section .nonstop-tile:hover {
-    background-color: #38bdf8;
+    background-color: var(--ns-accent, #38bdf8);
     color: #05111f;
-    border-color: #7dd3fc;
+    border-color: var(--ns-accent, #7dd3fc);
     box-shadow: 0 0 32px rgba(56, 189, 248, 0.35);
 }
 
@@ -427,6 +438,72 @@ body {
     display: block;
 }
 
+/* ── Hero picture frame (replaces the sale box when an image is set) ── */
+.hero-frame {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    overflow: hidden;
+    border: 2px solid var(--rule);
+    border-radius: 4px;
+    background-color: var(--bg-2);
+    box-shadow: 6px 6px 0 rgba(10, 10, 10, 0.12);
+}
+.hero-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* ── Cycling brand-logo showcase under the hero title ── */
+.brand-logos {
+    margin-top: 1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+}
+.brand-logo-frame {
+    position: relative;
+    width: 150px;
+    height: 52px;
+    border: 1px solid var(--rule);
+    background-color: var(--card);
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.brand-logo {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    max-width: 76%;
+    max-height: 66%;
+    object-fit: contain;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+.brand-logo.is-active {
+    opacity: 1;
+}
+
+/* ── Optional photo on "also on the shelf" items ── */
+.extra-photo {
+    width: 64px;
+    height: 64px;
+    border: 1px solid var(--rule-soft);
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: var(--bg-2);
+    flex-shrink: 0;
+}
+.extra-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
 /* ── Admin / CMS ── */
 .admin-shell {
     background-color: var(--bg);
@@ -447,6 +524,16 @@ body {
 .cms-input:focus {
     outline: 2px solid var(--green-bg);
     outline-offset: 0;
+}
+.cms-color {
+    width: 42px;
+    height: 38px;
+    padding: 2px;
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background-color: var(--card);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 .cms-thumb {
     width: 96px;
