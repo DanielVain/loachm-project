@@ -14,6 +14,17 @@ const toRow = (r) => ({
     status: r.status ?? "received",
     price: Number(r.price) || 0,
     notes: r.notes ?? "",
+    movements: Array.isArray(r.movements) ? r.movements : [],
+});
+
+/** Build a movement/timeline entry (Amazon-style status update). */
+const newMovement = (mv = {}) => ({
+    id: newId(),
+    at: new Date().toISOString(),
+    status: "received",
+    by: "",
+    note: "",
+    ...mv,
 });
 
 async function fetchRepairs() {
@@ -79,13 +90,24 @@ export function useRepairs() {
             timers.current[id] = setTimeout(async () => {
                 const row = ref.current.find((r) => r.id === id);
                 if (!row) return;
-                const { error } = await supabase
+                const payload = {
+                    ...toRow(row),
+                    updated_at: new Date().toISOString(),
+                };
+                let { error } = await supabase
                     .from("repairs")
-                    .update({
-                        ...toRow(row),
-                        updated_at: new Date().toISOString(),
-                    })
+                    .update(payload)
                     .eq("id", id);
+                // If the `movements` column isn't there yet, save everything
+                // else so repair editing keeps working (timeline persists once
+                // the column is added).
+                if (error && /movements|schema cache|column/i.test(error.message)) {
+                    const { movements, ...rest } = payload;
+                    ({ error } = await supabase
+                        .from("repairs")
+                        .update(rest)
+                        .eq("id", id));
+                }
                 if (error) console.warn("Repair save failed:", error.message);
                 dirty.current.delete(id);
             }, 600);
@@ -102,18 +124,54 @@ export function useRepairs() {
                     status: "received",
                     price: 0,
                     notes: "",
+                    movements: [newMovement({ status: "received", note: "נפתח תיקון" })],
                     created_at: new Date().toISOString(),
                 };
                 setRepairs((r) => [item, ...(r || [])]);
-                const { error } = await supabase
+                let { error } = await supabase
                     .from("repairs")
                     .insert(toRow(item));
+                if (error && /movements|schema cache|column/i.test(error.message)) {
+                    const { movements, ...rest } = toRow(item);
+                    ({ error } = await supabase.from("repairs").insert(rest));
+                }
                 if (error) console.warn("Add repair failed:", error.message);
                 return item;
             },
             updateRepair(id, patch) {
                 setRepairs((r) =>
                     (r || []).map((x) => (x.id === id ? { ...x, ...patch } : x)),
+                );
+                scheduleSave(id);
+            },
+            /** Append a timeline entry (and, if given, move the ticket's status). */
+            addMovement(id, mv) {
+                const entry = newMovement(mv);
+                setRepairs((r) =>
+                    (r || []).map((x) =>
+                        x.id === id
+                            ? {
+                                  ...x,
+                                  status: mv?.status ?? x.status,
+                                  movements: [...(x.movements || []), entry],
+                              }
+                            : x,
+                    ),
+                );
+                scheduleSave(id);
+            },
+            removeMovement(id, mid) {
+                setRepairs((r) =>
+                    (r || []).map((x) =>
+                        x.id === id
+                            ? {
+                                  ...x,
+                                  movements: (x.movements || []).filter(
+                                      (m) => m.id !== mid,
+                                  ),
+                              }
+                            : x,
+                    ),
                 );
                 scheduleSave(id);
             },

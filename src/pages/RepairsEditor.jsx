@@ -28,10 +28,73 @@ function fmtDate(iso) {
     }
 }
 
-function RepairCard({ repair, onChange, onRemove }) {
+function fmtDateTime(iso) {
+    if (!iso) return "";
+    try {
+        return new Date(iso).toLocaleString("he-IL", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    } catch {
+        return "";
+    }
+}
+
+/** Mini-form to append a timeline entry. */
+function AddMovement({ currentStatus, onAdd }) {
+    const [st, setSt] = useState(currentStatus);
+    const [by, setBy] = useState("");
+    const [note, setNote] = useState("");
+    return (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+            <select
+                className="cms-input"
+                value={st}
+                onChange={(e) => setSt(e.target.value)}
+            >
+                {REPAIR_STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                        {s.label}
+                    </option>
+                ))}
+            </select>
+            <input
+                className="cms-input"
+                placeholder="מטפל/ת"
+                value={by}
+                onChange={(e) => setBy(e.target.value)}
+            />
+            <input
+                className="cms-input col-span-2 md:col-span-1"
+                placeholder="הערה"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+            />
+            <button
+                type="button"
+                className="t-green-bg px-3 py-2 font-bold text-sm flex items-center justify-center gap-1"
+                style={{ color: "#0a0a0a" }}
+                onClick={() => {
+                    onAdd({ status: st, by, note });
+                    setBy("");
+                    setNote("");
+                }}
+            >
+                <Plus className="w-4 h-4" strokeWidth={2.5} />
+                עדכון
+            </button>
+        </div>
+    );
+}
+
+function RepairCard({ repair, onChange, onRemove, onAddMovement, onRemoveMovement }) {
     const meta = statusMeta(repair.status);
     const telHref =
         "tel:" + (repair.phone || "").replace(/[^\d+]/g, "").replace(/^00/, "+");
+    const movements = repair.movements || [];
 
     return (
         <div className="cms-card t-card border t-rule p-4 md:p-5">
@@ -79,7 +142,12 @@ function RepairCard({ repair, onChange, onRemove }) {
                     <select
                         className="cms-input"
                         value={repair.status}
-                        onChange={(e) => onChange({ status: e.target.value })}
+                        onChange={(e) =>
+                            onAddMovement({
+                                status: e.target.value,
+                                note: "עודכן סטטוס",
+                            })
+                        }
                     >
                         {REPAIR_STATUSES.map((s) => (
                             <option key={s.value} value={s.value}>
@@ -116,6 +184,75 @@ function RepairCard({ repair, onChange, onRemove }) {
                 </Field>
             </div>
 
+            {/* ── Movement timeline ── */}
+            <div className="mt-4 pt-3 border-t t-rule-soft">
+                <div className="uppercase-mono t-mute mb-2">מסלול הטיפול</div>
+                {movements.length > 0 && (
+                    <div className="repair-timeline">
+                        {movements
+                            .slice()
+                            .reverse()
+                            .map((m) => {
+                                const mm = statusMeta(m.status);
+                                return (
+                                    <div key={m.id} className="repair-move">
+                                        <span
+                                            className="repair-move-dot"
+                                            style={{ backgroundColor: mm.color }}
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <span
+                                                    className="font-bold text-sm"
+                                                    style={{ color: mm.color }}
+                                                >
+                                                    {mm.label}
+                                                </span>
+                                                {m.by && (
+                                                    <span className="t-mute text-xs">
+                                                        · {m.by}
+                                                    </span>
+                                                )}
+                                                <span
+                                                    className="uppercase-mono t-mute"
+                                                    style={{
+                                                        marginInlineStart:
+                                                            "auto",
+                                                    }}
+                                                >
+                                                    {fmtDateTime(m.at)}
+                                                </span>
+                                            </div>
+                                            {m.note && (
+                                                <div
+                                                    className="text-xs t-mute mt-0.5"
+                                                    dir="auto"
+                                                >
+                                                    {m.note}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            aria-label="הסר עדכון"
+                                            className="t-mute h-green flex-shrink-0"
+                                            onClick={() =>
+                                                onRemoveMovement(m.id)
+                                            }
+                                        >
+                                            <X className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                    </div>
+                )}
+                <AddMovement
+                    currentStatus={repair.status}
+                    onAdd={onAddMovement}
+                />
+            </div>
+
             <div className="flex items-center justify-between mt-3 pt-3 border-t t-rule-soft">
                 {repair.phone ? (
                     <a
@@ -143,8 +280,15 @@ function RepairCard({ repair, onChange, onRemove }) {
 }
 
 export default function RepairsEditor() {
-    const { repairs, loading, addRepair, updateRepair, removeRepair } =
-        useRepairs();
+    const {
+        repairs,
+        loading,
+        addRepair,
+        updateRepair,
+        removeRepair,
+        addMovement,
+        removeMovement,
+    } = useRepairs();
     const [query, setQuery] = useState("");
     const [status, setStatus] = useState("all");
 
@@ -235,6 +379,8 @@ export default function RepairsEditor() {
                         repair={r}
                         onChange={(patch) => updateRepair(r.id, patch)}
                         onRemove={() => removeRepair(r.id)}
+                        onAddMovement={(mv) => addMovement(r.id, mv)}
+                        onRemoveMovement={(mid) => removeMovement(r.id, mid)}
                     />
                 ))}
 
