@@ -42,6 +42,14 @@ export default function Img({
     }, [show]);
 
     const done = () => setLoaded(true);
+    // Eager images (hero, lightbox) are preloaded before they mount, so they
+    // appear instantly — no fade. Lazy images fade in (off-screen, unseen).
+    const cls = [
+        eager ? "" : `img-fade${loaded ? " is-loaded" : ""}`,
+        className,
+    ]
+        .filter(Boolean)
+        .join(" ");
     return (
         <img
             ref={ref}
@@ -49,9 +57,7 @@ export default function Img({
             src={show ? src : undefined}
             loading={eager ? "eager" : "lazy"}
             decoding="async"
-            className={`img-fade${loaded ? " is-loaded" : ""}${
-                className ? " " + className : ""
-            }`}
+            className={cls}
             onLoad={(e) => {
                 done();
                 onLoad?.(e);

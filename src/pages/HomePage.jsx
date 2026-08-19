@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useContent } from "../store/ContentContext.jsx";
-import { resolveSections } from "../data/content.js";
+import { resolveSections, heroImageList } from "../data/content.js";
 import Ticker from "../components/Ticker.jsx";
 import Header from "../components/Header.jsx";
 import Hero from "../components/Hero.jsx";
@@ -52,13 +52,45 @@ export default function HomePage() {
         });
     };
 
+    // Keep the skeleton up until the hero photo (the topmost image) has loaded,
+    // so it's already there the moment real content replaces the skeleton — no
+    // watching it load. Extra gallery photos preload quietly without gating; a
+    // timeout makes sure the skeleton never hangs on a slow/broken image.
+    const [heroReady, setHeroReady] = useState(false);
+    useEffect(() => {
+        if (loading) return;
+        const urls = heroImageList(content.layout);
+        const first = urls[0];
+        if (!first) {
+            setHeroReady(true);
+            return;
+        }
+        let cancelled = false;
+        const ready = () => !cancelled && setHeroReady(true);
+        const img = new Image();
+        img.onload = ready;
+        img.onerror = ready;
+        img.src = first;
+        if (img.complete) ready();
+        urls.slice(1).forEach((u) => {
+            const pre = new Image();
+            pre.src = u;
+        });
+        const t = setTimeout(ready, 3000);
+        return () => {
+            cancelled = true;
+            clearTimeout(t);
+        };
+    }, [loading, content.layout]);
+
     const sections = resolveSections(content.layout);
+    const showSkeleton = loading || !heroReady;
 
     return (
         <div className="min-h-screen">
             <Ticker />
             <Header dark={dark} onToggleTheme={toggleTheme} />
-            {loading ? (
+            {showSkeleton ? (
                 <PageSkeleton />
             ) : (
                 <div className="content-fade-in">
