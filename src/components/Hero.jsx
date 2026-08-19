@@ -32,14 +32,18 @@ function HeroFrame({ images, alt }) {
 
     if (images.length === 1) {
         return (
-            <div className="hero-frame">
+            <div className="hero-frame hero-frame-tall">
                 <img src={images[0]} alt={alt} loading="lazy" />
             </div>
         );
     }
 
     return (
-        <div className="hero-frame hero-frame-gallery" role="img" aria-label={alt}>
+        <div
+            className="hero-frame hero-frame-tall hero-frame-gallery"
+            role="img"
+            aria-label={alt}
+        >
             {images.map((src, idx) => (
                 <img
                     key={src + idx}
@@ -59,6 +63,10 @@ export default function Hero() {
     const { content } = useContent();
     const clock = useClock();
 
+    const heroImages = heroImageList(content.layout);
+    const showImage =
+        content.layout.heroPanel === "image" && heroImages.length > 0;
+
     return (
         <section className="scanlines border-b t-rule">
             <div className="max-w-[1280px] mx-auto px-5 md:px-8 py-14 md:py-20">
@@ -70,14 +78,13 @@ export default function Hero() {
                             · <span dir="ltr">{clock}</span>
                         </span>
                     </div>
-                    <div className="hidden md:flex items-center gap-5">
-                        <span>מלאי · {content.deals.length} פריטים</span>
-                        <span>·</span>
-                        <span>שבוע מבצעים 19</span>
-                    </div>
                 </div>
 
-                <div className="grid grid-cols-12 gap-6 md:gap-10 items-end">
+                <div
+                    className={`grid grid-cols-12 gap-6 md:gap-10 ${
+                        showImage ? "md:items-stretch" : "items-end"
+                    }`}
+                >
                     <div className="col-span-12 md:col-span-8">
                         <div className="font-heb text-base md:text-lg t-mute mb-4">
                             {content.brand.taglineHe}
@@ -107,11 +114,10 @@ export default function Hero() {
                         </p>
                     </div>
 
-                    <div className="col-span-12 md:col-span-4">
-                        {content.layout.heroPanel === "image" &&
-                        heroImageList(content.layout).length ? (
+                    <div className="col-span-12 md:col-span-4 flex">
+                        {showImage ? (
                             <HeroFrame
-                                images={heroImageList(content.layout)}
+                                images={heroImages}
                                 alt={
                                     content.layout.heroImageAlt ||
                                     "תמונות של החנות"

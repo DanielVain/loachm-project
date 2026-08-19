@@ -454,6 +454,18 @@ body {
     object-fit: cover;
     display: block;
 }
+/* Tall variant: fill the hero column so the photo spans nearly the full height. */
+.hero-frame-tall {
+    flex: 1;
+    align-self: stretch;
+    aspect-ratio: auto;
+    min-height: 300px;
+}
+@media (min-width: 768px) {
+    .hero-frame-tall {
+        min-height: 460px;
+    }
+}
 /* Crossfading gallery of store photos: slides stacked, fading between each. */
 .hero-frame-gallery {
     position: relative;
