@@ -162,24 +162,6 @@ body {
     font-size: 0.7rem;
 }
 
-/* ── Ticker ── (reversed direction: moves left-to-right) */
-@keyframes ticker {
-    from {
-        transform: translateX(-50%);
-    }
-    to {
-        transform: translateX(0);
-    }
-}
-.ticker-track {
-    display: flex;
-    width: max-content;
-    animation: ticker 42s linear infinite;
-}
-.ticker-track:hover {
-    animation-play-state: paused;
-}
-
 /* ── Hero scanlines ── */
 .scanlines {
     background-image: repeating-linear-gradient(
