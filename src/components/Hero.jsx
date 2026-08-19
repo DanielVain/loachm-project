@@ -64,6 +64,12 @@ export default function Hero() {
     const { content } = useContent();
     const clock = useClock();
 
+    const hero = content.hero || {};
+    const statusText = hero.status ?? "המערכת מקוונת";
+    const introText =
+        hero.intro ??
+        "משחקי מחשב וקונסולות, ציוד גיימינג, ומדף ה-NONSTOP היחיד בישראל. במלאי. יוצא מהדלת עוד היום.";
+
     const heroImages = heroImageList(content.layout);
     const showImage =
         content.layout.heroPanel === "image" && heroImages.length > 0;
@@ -74,7 +80,7 @@ export default function Hero() {
                 <div className="flex items-center justify-between uppercase-mono t-mute mb-10">
                     <div className="flex items-center gap-2">
                         <Led px={6} />
-                        <span className="t-green">המערכת מקוונת</span>
+                        <span className="t-green">{statusText}</span>
                         <span className="hidden sm:inline">
                             · <span dir="ltr">{clock}</span>
                         </span>
@@ -108,10 +114,11 @@ export default function Hero() {
                             </span>
                         </div>
 
-                        <p className="mt-6 md:mt-8 text-lg md:text-2xl max-w-2xl leading-snug">
-                            משחקי מחשב וקונסולות, ציוד גיימינג, ומדף ה-
-                            <span className="t-green font-bold">NONSTOP</span>{" "}
-                            היחיד בישראל. במלאי. יוצא מהדלת עוד היום.
+                        <p
+                            className="mt-6 md:mt-8 text-lg md:text-2xl max-w-2xl leading-snug"
+                            dir="auto"
+                        >
+                            {introText}
                         </p>
                     </div>
 

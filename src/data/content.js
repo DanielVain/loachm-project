@@ -118,6 +118,12 @@ export const DEFAULT_CONTENT = {
         taglineHe: "כל עולם הגיימינג, במחירי לוח.",
         established: 2019,
     },
+    // Hero copy (everything but the big logo, which stays brand.lead/accent).
+    hero: {
+        status: "המערכת מקוונת", // "system online" status line
+        intro:
+            "משחקי מחשב וקונסולות, ציוד גיימינג, ומדף ה-NONSTOP היחיד בישראל. במלאי. יוצא מהדלת עוד היום.",
+    },
     contact: {
         phone: "058-7748846",
         phoneTel: "+972587748846",

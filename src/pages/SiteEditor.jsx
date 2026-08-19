@@ -196,6 +196,16 @@ export default function SiteEditor() {
 
     const setLayout = (patch) => updateSite({ layout: { ...layout, ...patch } });
 
+    /* ── Hero text (everything but the big לוחM logo) ── */
+    const brand = content.brand;
+    const contact = content.contact;
+    const hero = content.hero || {};
+    const setBrand = (key, val) =>
+        updateSite({ brand: { ...brand, [key]: val } });
+    const setContact = (key, val) =>
+        updateSite({ contact: { ...contact, [key]: val } });
+    const setHero = (key, val) => updateSite({ hero: { ...hero, [key]: val } });
+
     /* ── Section arrangement (order + visibility) ── */
     const sections = resolveSections(layout);
     const saveSections = (next) =>
@@ -353,6 +363,42 @@ export default function SiteEditor() {
                             ))}
                     </div>
                 </div>
+            </Card>
+
+            {/* ── Hero text ── */}
+            <Card title="טקסט ההירו">
+                <p className="uppercase-mono t-mute">
+                    כל הטקסטים בראש העמוד ניתנים לעריכה — חוץ מהלוגו הגדול
+                    (לוחM), שנשאר קבוע.
+                </p>
+                <Text
+                    label="שורת תיאור (מעל הלוגו)"
+                    value={brand.taglineHe}
+                    onChange={(v) => setBrand("taglineHe", v)}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Text
+                        label="כתובת (שורת מיקום)"
+                        value={contact.addressHe}
+                        onChange={(v) => setContact("addressHe", v)}
+                    />
+                    <Text
+                        label="עיר"
+                        value={contact.city}
+                        onChange={(v) => setContact("city", v)}
+                    />
+                </div>
+                <Area
+                    label="פסקת פתיחה (מתחת לכתובת)"
+                    value={hero.intro}
+                    onChange={(v) => setHero("intro", v)}
+                />
+                <Text
+                    label="שורת סטטוס (ליד המחוון הירוק)"
+                    value={hero.status}
+                    onChange={(v) => setHero("status", v)}
+                    placeholder="המערכת מקוונת"
+                />
             </Card>
 
             {/* ── Ticker ── */}
@@ -807,8 +853,8 @@ export default function SiteEditor() {
             </Card>
 
             <p className="uppercase-mono t-mute">
-                השינויים נשמרים בענן ומופיעים מיד באתר · ההירו והטלפונים נשארים
-                קבועים.
+                השינויים נשמרים בענן ומופיעים מיד באתר · הלוגו הגדול (לוחM)
+                והטלפונים נשארים קבועים.
             </p>
         </div>
     );
