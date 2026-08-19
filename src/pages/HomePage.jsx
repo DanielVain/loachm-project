@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useContent } from "../store/ContentContext.jsx";
+import { resolveSections } from "../data/content.js";
 import Ticker from "../components/Ticker.jsx";
 import Header from "../components/Header.jsx";
 import Hero from "../components/Hero.jsx";
@@ -9,20 +10,25 @@ import ExtrasGrid from "../components/ExtrasGrid.jsx";
 import VisitContact from "../components/VisitContact.jsx";
 import PageSkeleton from "../components/PageSkeleton.jsx";
 
-const prefersDark = () =>
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+/** Body sections the layout editor can reorder / hide. */
+const SECTION_COMPONENTS = {
+    nonstop: NonstopFeature,
+    deals: DealsGrid,
+    extras: ExtrasGrid,
+    visit: VisitContact,
+};
 
-/** Initial theme: an explicit saved choice wins, otherwise follow the OS. */
+/**
+ * Initial theme: dark by default. Only an explicit choice of "light" opts out —
+ * the OS setting is not followed, so visitors always land on the dark look.
+ */
 const initialDark = () => {
     try {
-        const saved = localStorage.getItem("theme");
-        if (saved === "dark") return true;
-        if (saved === "light") return false;
+        if (localStorage.getItem("theme") === "light") return false;
     } catch {
         /* localStorage unavailable */
     }
-    return prefersDark();
+    return true;
 };
 
 /** The public storefront. */
@@ -33,23 +39,6 @@ export default function HomePage() {
     useEffect(() => {
         document.documentElement.dataset.theme = dark ? "dark" : "light";
     }, [dark]);
-
-    // Follow the OS light/dark setting live — unless the user has toggled
-    // manually (a saved choice takes precedence).
-    useEffect(() => {
-        const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
-        if (!mq) return;
-        const onChange = (e) => {
-            try {
-                if (localStorage.getItem("theme")) return;
-            } catch {
-                /* ignore */
-            }
-            setDark(e.matches);
-        };
-        mq.addEventListener?.("change", onChange);
-        return () => mq.removeEventListener?.("change", onChange);
-    }, []);
 
     const toggleTheme = () => {
         setDark((d) => {
@@ -63,6 +52,8 @@ export default function HomePage() {
         });
     };
 
+    const sections = resolveSections(content.layout);
+
     return (
         <div className="min-h-screen">
             <Ticker />
@@ -72,10 +63,12 @@ export default function HomePage() {
             ) : (
                 <div className="content-fade-in">
                     <Hero />
-                    {content.layout.showNonstop && <NonstopFeature />}
-                    <DealsGrid />
-                    <ExtrasGrid />
-                    <VisitContact />
+                    {sections
+                        .filter((s) => s.visible)
+                        .map((s) => {
+                            const C = SECTION_COMPONENTS[s.id];
+                            return C ? <C key={s.id} /> : null;
+                        })}
                 </div>
             )}
         </div>

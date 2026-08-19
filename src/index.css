@@ -454,6 +454,15 @@ body {
     object-fit: cover;
     display: block;
 }
+/* Crossfading gallery of store photos: slides stacked, fading between each. */
+.hero-frame-gallery {
+    position: relative;
+}
+.hero-frame-slide {
+    position: absolute;
+    inset: 0;
+    transition: opacity 1s ease-in-out;
+}
 
 /* ── Centered brand showcase under the hero (all logos side by side) ── */
 .brand-strip {
@@ -518,6 +527,99 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
+}
+
+/* ── Layout editor (CMS): reorder / hide sections with a live preview ── */
+.layout-editor {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: start;
+}
+@media (min-width: 720px) {
+    .layout-editor {
+        grid-template-columns: 1.1fr 0.9fr;
+    }
+}
+.layout-pinned {
+    border: 1px dashed var(--rule);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    color: var(--mute);
+    background-color: var(--bg-2);
+    text-align: center;
+}
+.layout-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    border: 1px solid var(--rule);
+    background-color: var(--card);
+    border-radius: 4px;
+    padding: 10px 12px;
+    transition: opacity 0.15s ease;
+}
+.layout-row.is-hidden {
+    opacity: 0.5;
+}
+.layout-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.layout-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background-color: var(--bg-2);
+    color: var(--text);
+    cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        color 0.15s ease;
+}
+.layout-btn:hover:not(:disabled) {
+    border-color: var(--green-bg);
+    color: var(--green-text);
+}
+.layout-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+.layout-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background-color: var(--bg-2);
+    position: sticky;
+    top: 12px;
+}
+.lp-block {
+    border: 1px solid var(--rule);
+    background-color: var(--card);
+    border-radius: 3px;
+    padding: 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+}
+.lp-hero {
+    font-family: "Archivo Black", "Heebo", sans-serif;
+    font-size: 1.5rem;
+    padding: 14px;
+    background-color: var(--green-bg);
+    color: #0a0a0a;
+    border-color: var(--green-bg);
 }
 
 /* ── Admin / CMS ── */

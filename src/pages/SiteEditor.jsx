@@ -6,10 +6,21 @@ import {
     ImagePlus,
     Loader2,
     Image as ImageIcon,
+    ArrowUp,
+    ArrowDown,
+    Eye,
+    EyeOff,
 } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import { uploadProductImage } from "../store/supabase.js";
-import { ICON_OPTIONS, iconFor, WEEKDAYS_HE, newId } from "../data/content.js";
+import {
+    ICON_OPTIONS,
+    iconFor,
+    WEEKDAYS_HE,
+    newId,
+    resolveSections,
+    heroImageList,
+} from "../data/content.js";
 
 const MAX_IMAGE_BYTES = 5_000_000; // 5 MB
 
@@ -184,6 +195,39 @@ export default function SiteEditor() {
         });
 
     const setLayout = (patch) => updateSite({ layout: { ...layout, ...patch } });
+
+    /* ── Section arrangement (order + visibility) ── */
+    const sections = resolveSections(layout);
+    const saveSections = (next) =>
+        setLayout({ sections: next.map((s) => ({ id: s.id, visible: s.visible })) });
+    const moveSection = (i, dir) => {
+        const j = i + dir;
+        if (j < 0 || j >= sections.length) return;
+        const next = [...sections];
+        [next[i], next[j]] = [next[j], next[i]];
+        saveSections(next);
+    };
+    const toggleSection = (i) =>
+        saveSections(
+            sections.map((s, k) =>
+                k === i ? { ...s, visible: !s.visible } : s,
+            ),
+        );
+
+    /* ── Hero picture-frame gallery (crossfading store photos) ── */
+    const heroImages = heroImageList(layout);
+    const setHeroImage = (i, url) =>
+        setLayout({
+            heroImages: heroImages.map((s, j) => (j === i ? url : s)),
+        });
+    const addHeroImage = (url) =>
+        setLayout({ heroImages: [...heroImages, url], heroImage: "" });
+    const removeHeroImage = (i) =>
+        setLayout({
+            heroImages: heroImages.filter((_, j) => j !== i),
+            heroImage: "",
+        });
+
     const setNsColor = (key, val) =>
         updateSite({ nonstopColors: { ...nonstopColors, [key]: val } });
     const setLogo = (i, patch) =>
@@ -220,6 +264,97 @@ export default function SiteEditor() {
 
     return (
         <div className="flex flex-col gap-6 max-w-3xl">
+            {/* ── Layout / section arrangement ── */}
+            <Card title="פריסת העמוד — סידור מקטעים">
+                <p className="uppercase-mono t-mute">
+                    שנו את הסדר עם החצים או הסתירו מקטעים. התצוגה המקדימה מתעדכנת
+                    מיד — כך ייראה סדר העמוד ללקוח (ההירו קבוע תמיד למעלה).
+                </p>
+                <div className="layout-editor">
+                    <div className="flex flex-col gap-2">
+                        <div className="layout-pinned">
+                            הירו — קבוע למעלה
+                        </div>
+                        {sections.map((s, i) => (
+                            <div
+                                key={s.id}
+                                className={`layout-row${
+                                    s.visible ? "" : " is-hidden"
+                                }`}
+                            >
+                                <div className="flex flex-col">
+                                    <span className="font-bold text-sm">
+                                        {s.label}
+                                    </span>
+                                    <span className="uppercase-mono t-mute">
+                                        {s.hint}
+                                    </span>
+                                </div>
+                                <div className="layout-row-actions">
+                                    <button
+                                        type="button"
+                                        className="layout-btn"
+                                        aria-label="הזז למעלה"
+                                        disabled={i === 0}
+                                        onClick={() => moveSection(i, -1)}
+                                    >
+                                        <ArrowUp
+                                            className="w-4 h-4"
+                                            strokeWidth={2.2}
+                                        />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="layout-btn"
+                                        aria-label="הזז למטה"
+                                        disabled={i === sections.length - 1}
+                                        onClick={() => moveSection(i, 1)}
+                                    >
+                                        <ArrowDown
+                                            className="w-4 h-4"
+                                            strokeWidth={2.2}
+                                        />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="layout-btn"
+                                        aria-label={
+                                            s.visible ? "הסתר מקטע" : "הצג מקטע"
+                                        }
+                                        onClick={() => toggleSection(i)}
+                                    >
+                                        {s.visible ? (
+                                            <Eye
+                                                className="w-4 h-4"
+                                                strokeWidth={2.2}
+                                            />
+                                        ) : (
+                                            <EyeOff
+                                                className="w-4 h-4"
+                                                strokeWidth={2.2}
+                                            />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="layout-preview" aria-hidden="true">
+                        <div className="lp-block lp-hero">
+                            {content.brand.lead}
+                            {content.brand.accent}
+                        </div>
+                        {sections
+                            .filter((s) => s.visible)
+                            .map((s) => (
+                                <div key={s.id} className="lp-block">
+                                    {s.label}
+                                </div>
+                            ))}
+                    </div>
+                </div>
+            </Card>
+
             {/* ── Ticker ── */}
             <Card title="רצועת חדשות (טיקר)">
                 <div className="flex flex-col gap-2">
@@ -284,12 +419,44 @@ export default function SiteEditor() {
                     </select>
                 </label>
                 {layout.heroPanel === "image" && (
-                    <ImageField
-                        label="תמונת ההירו"
-                        value={layout.heroImage}
-                        onChange={(url) => setLayout({ heroImage: url })}
-                        hint="אם ריק — תוצג תיבת המבצע השבועי"
-                    />
+                    <div className="flex flex-col gap-3">
+                        <div className="uppercase-mono t-mute">
+                            תמונות החנות (יותר מאחת — מתחלפות בהדרגה כל ~2.5 שניות)
+                        </div>
+                        {heroImages.map((img, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center gap-3 border-t t-rule-soft pt-3 first:border-t-0 first:pt-0"
+                            >
+                                <ImageField
+                                    value={img}
+                                    onChange={(url) => setHeroImage(i, url)}
+                                />
+                                <button
+                                    type="button"
+                                    aria-label="הסר תמונה"
+                                    className="t-mute h-green"
+                                    onClick={() => removeHeroImage(i)}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                        <ImageField
+                            label={
+                                heroImages.length ? "הוסף תמונה" : "העלה תמונה"
+                            }
+                            value=""
+                            onChange={(url) => addHeroImage(url)}
+                            hint="אם ריק לגמרי — תוצג תיבת המבצע השבועי"
+                        />
+                        <Text
+                            label="טקסט חלופי לתמונות (alt)"
+                            value={layout.heroImageAlt}
+                            onChange={(v) => setLayout({ heroImageAlt: v })}
+                            placeholder="תמונות של החנות"
+                        />
+                    </div>
                 )}
 
                 <Text
@@ -442,16 +609,9 @@ export default function SiteEditor() {
 
             {/* ── NONSTOP design ── */}
             <Card title="עיצוב מקטע NONSTOP">
-                <label className="flex items-center gap-2">
-                    <input
-                        type="checkbox"
-                        checked={layout.showNonstop}
-                        onChange={(e) =>
-                            setLayout({ showNonstop: e.target.checked })
-                        }
-                    />
-                    <span className="uppercase-mono">הצג את מקטע NONSTOP</span>
-                </label>
+                <p className="uppercase-mono t-mute">
+                    הצגה / הסתרה של המקטע מתבצעת ב״פריסת העמוד״ למעלה.
+                </p>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <ColorField
                         label="צבע רקע"

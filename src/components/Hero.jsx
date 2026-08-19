@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
+import { heroImageList } from "../data/content.js";
 import Led from "./Led.jsx";
 import BrandLogos from "./BrandLogos.jsx";
 
@@ -13,6 +14,45 @@ function useClock() {
     }, []);
     const p = (n) => String(n).padStart(2, "0");
     return `${p(now.getHours())}:${p(now.getMinutes())}:${p(now.getSeconds())}`;
+}
+
+/** Hero picture frame — a single photo, or a crossfading gallery of store photos. */
+function HeroFrame({ images, alt }) {
+    const [i, setI] = useState(0);
+
+    useEffect(() => {
+        if (images.length < 2) return;
+        setI(0);
+        const t = setInterval(
+            () => setI((n) => (n + 1) % images.length),
+            2600,
+        );
+        return () => clearInterval(t);
+    }, [images.length]);
+
+    if (images.length === 1) {
+        return (
+            <div className="hero-frame">
+                <img src={images[0]} alt={alt} loading="lazy" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="hero-frame hero-frame-gallery" role="img" aria-label={alt}>
+            {images.map((src, idx) => (
+                <img
+                    key={src + idx}
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    className="hero-frame-slide"
+                    style={{ opacity: idx === i ? 1 : 0 }}
+                    aria-hidden="true"
+                />
+            ))}
+        </div>
+    );
 }
 
 export default function Hero() {
@@ -69,14 +109,14 @@ export default function Hero() {
 
                     <div className="col-span-12 md:col-span-4">
                         {content.layout.heroPanel === "image" &&
-                        content.layout.heroImage ? (
-                            <div className="hero-frame">
-                                <img
-                                    src={content.layout.heroImage}
-                                    alt=""
-                                    loading="lazy"
-                                />
-                            </div>
+                        heroImageList(content.layout).length ? (
+                            <HeroFrame
+                                images={heroImageList(content.layout)}
+                                alt={
+                                    content.layout.heroImageAlt ||
+                                    "תמונות של החנות"
+                                }
+                            />
                         ) : (
                             <div className="weekly-drop-box p-5 md:p-6">
                                 <div className="uppercase-mono mb-3 flex items-center gap-2 weekly-drop-ink">

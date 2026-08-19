@@ -178,8 +178,17 @@ export const DEFAULT_CONTENT = {
     /* ── Layout / customization (managed in the CMS "layout" controls) ── */
     layout: {
         heroPanel: "image", // "image" (picture frame) | "weeklyDrop" (sale box)
-        heroImage: "", // URL of the hero picture-frame image
-        showNonstop: true, // show / hide the NONSTOP section
+        heroImage: "", // legacy single image (kept for back-compat)
+        heroImages: [], // gallery of store photos — crossfades if more than one
+        heroImageAlt: "תמונות של החנות", // alt text for the hero picture frame
+        showNonstop: true, // legacy; superseded by `sections` below
+        // Ordered, toggleable body sections (Hero is always pinned on top).
+        sections: [
+            { id: "nonstop", visible: true },
+            { id: "deals", visible: true },
+            { id: "extras", visible: true },
+            { id: "visit", visible: true },
+        ],
     },
     /* Cycling brand-logo strip under the hero title (images uploaded in CMS). */
     brandLogos: [
@@ -340,6 +349,50 @@ export const pct = (was, now) =>
 /** Stable-ish id generator for new board items. */
 export const newId = () =>
     "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+/* ───────────────────────────────────────────────────────────────
+   Layout editor — the reorderable body sections of the storefront.
+   Hero is always pinned at the top and is not part of this list.
+   ─────────────────────────────────────────────────────────────── */
+export const HOME_SECTIONS = [
+    { id: "nonstop", label: "מקטע NONSTOP", hint: "המדף הבלעדי" },
+    { id: "deals", label: "הלוח — מבצעים", hint: "רשת המוצרים" },
+    { id: "extras", label: "גם על המדף", hint: "פריטים נוספים" },
+    { id: "visit", label: "יצירת קשר וביקור", hint: "טלפון · מפה · שעות" },
+];
+
+/**
+ * Reconcile a saved `layout.sections` array with the known set: keep the saved
+ * order + visibility, append any sections added since (so new features show up),
+ * and drop unknown ids. Falls back to the legacy `showNonstop` flag when no
+ * sections were ever saved. Returns [{ id, label, hint, visible }].
+ */
+export function resolveSections(layout = {}) {
+    const known = new Map(HOME_SECTIONS.map((s) => [s.id, s]));
+    const saved = Array.isArray(layout.sections) ? layout.sections : [];
+    const seen = new Set();
+    const out = [];
+    for (const s of saved) {
+        const meta = known.get(s?.id);
+        if (!meta || seen.has(s.id)) continue;
+        seen.add(s.id);
+        out.push({ ...meta, visible: s.visible !== false });
+    }
+    for (const meta of HOME_SECTIONS) {
+        if (seen.has(meta.id)) continue;
+        const visible = !(meta.id === "nonstop" && layout.showNonstop === false);
+        out.push({ ...meta, visible });
+    }
+    return out;
+}
+
+/** The store photos shown in the hero picture frame (new gallery, or legacy single). */
+export function heroImageList(layout = {}) {
+    const list = Array.isArray(layout.heroImages) ? layout.heroImages : [];
+    const clean = list.filter((s) => typeof s === "string" && s.trim());
+    if (clean.length) return clean;
+    return layout.heroImage ? [layout.heroImage] : [];
+}
 
 /* ───────────────────────────────────────────────────────────────
    Opening-hours logic — shared by the displayed hours list and the
