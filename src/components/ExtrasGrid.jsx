@@ -1,6 +1,7 @@
 import { ShoppingBag } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import { iconFor } from "../data/content.js";
+import Img from "./Img.jsx";
 
 /** "גם בחנות" — secondary in-store offerings. */
 export default function ExtrasGrid() {
@@ -34,11 +35,7 @@ export default function ExtrasGrid() {
                             >
                                 {e.image ? (
                                     <div className="extra-photo flex-shrink-0">
-                                        <img
-                                            src={e.image}
-                                            alt={e.name}
-                                            loading="lazy"
-                                        />
+                                        <Img src={e.image} alt={e.name} />
                                     </div>
                                 ) : (
                                     <div className="t-green-bg p-3 flex-shrink-0">

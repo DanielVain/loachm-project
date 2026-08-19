@@ -1,4 +1,5 @@
 import { useContent } from "../store/ContentContext.jsx";
+import Img from "./Img.jsx";
 
 /** A prominent, centered brand showcase: a semi-large title with all the brand
     logos shown side by side. Hidden until at least one logo has an image. */
@@ -13,7 +14,7 @@ export default function BrandLogos() {
             <div className="brand-strip-logos">
                 {logos.map((l) => (
                     <div key={l.id} className="brand-logo-item">
-                        <img src={l.image} alt={l.name} loading="lazy" />
+                        <Img src={l.image} alt={l.name} />
                     </div>
                 ))}
             </div>

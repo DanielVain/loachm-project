@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Flame, Maximize2 } from "lucide-react";
 import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
 import Led from "./Led.jsx";
+import Img from "./Img.jsx";
 import DealModal from "./DealModal.jsx";
 
 /** A single board item. Shows a product photo when one is set, otherwise
@@ -39,7 +40,7 @@ export default function DealCard({ deal }) {
 
             {deal.image ? (
                 <div className="deal-photo mb-5">
-                    <img src={deal.image} alt={deal.name} loading="lazy" />
+                    <Img src={deal.image} alt={deal.name} />
                     <span className="deal-photo-zoom" aria-hidden="true">
                         <Maximize2 className="w-3.5 h-3.5" strokeWidth={2.5} />
                     </span>

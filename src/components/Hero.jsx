@@ -3,6 +3,7 @@ import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
 import { heroImageList } from "../data/content.js";
 import Led from "./Led.jsx";
+import Img from "./Img.jsx";
 import BrandLogos from "./BrandLogos.jsx";
 
 /** Live HH:MM:SS clock for the "system online" status line. */
@@ -33,7 +34,7 @@ function HeroFrame({ images, alt }) {
     if (images.length === 1) {
         return (
             <div className="hero-frame hero-frame-tall">
-                <img src={images[0]} alt={alt} loading="lazy" />
+                <Img src={images[0]} alt={alt} />
             </div>
         );
     }

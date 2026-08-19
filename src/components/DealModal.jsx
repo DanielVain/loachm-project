@@ -4,6 +4,7 @@ import { X, Flame, Phone } from "lucide-react";
 import { fmt, pct, iconFor, splitSpec } from "../data/content.js";
 import { useContent } from "../store/ContentContext.jsx";
 import Led from "./Led.jsx";
+import Img from "./Img.jsx";
 
 /** Full-screen detail view for a board item: big photo, specs, price, call CTA. */
 export default function DealModal({ deal, onClose }) {
@@ -61,7 +62,7 @@ export default function DealModal({ deal, onClose }) {
 
                 {deal.image ? (
                     <div className="deal-modal-photo">
-                        <img src={deal.image} alt={deal.name} />
+                        <Img src={deal.image} alt={deal.name} />
                     </div>
                 ) : (
                     <div className="deal-modal-photo deal-modal-photo--icon">
