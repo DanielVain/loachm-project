@@ -49,30 +49,36 @@ function AddMovement({ currentStatus, onAdd }) {
     const [by, setBy] = useState("");
     const [note, setNote] = useState("");
     return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3">
-            <select
-                className="cms-input"
-                value={st}
-                onChange={(e) => setSt(e.target.value)}
-            >
-                {REPAIR_STATUSES.map((s) => (
-                    <option key={s.value} value={s.value}>
-                        {s.label}
-                    </option>
-                ))}
-            </select>
-            <input
-                className="cms-input"
-                placeholder="מטפל/ת"
-                value={by}
-                onChange={(e) => setBy(e.target.value)}
-            />
-            <input
-                className="cms-input col-span-2 md:col-span-1"
-                placeholder="הערה"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-            />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 items-end">
+            <Field label="סטטוס">
+                <select
+                    className="cms-input"
+                    value={st}
+                    onChange={(e) => setSt(e.target.value)}
+                >
+                    {REPAIR_STATUSES.map((s) => (
+                        <option key={s.value} value={s.value}>
+                            {s.label}
+                        </option>
+                    ))}
+                </select>
+            </Field>
+            <Field label="מטפל/ת">
+                <input
+                    className="cms-input"
+                    placeholder="שם המטפל/ת"
+                    value={by}
+                    onChange={(e) => setBy(e.target.value)}
+                />
+            </Field>
+            <Field label="תיאור הסטטוס" className="col-span-2 md:col-span-1">
+                <input
+                    className="cms-input"
+                    placeholder="הערה / תיאור"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                />
+            </Field>
             <button
                 type="button"
                 className="t-green-bg px-3 py-2 font-bold text-sm flex items-center justify-center gap-1"
