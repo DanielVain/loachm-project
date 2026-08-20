@@ -191,15 +191,30 @@ export function useRepairs() {
     return { repairs, loading: repairs === null, ...api };
 }
 
+/**
+ * The single source of truth for repair statuses — drives the editor's status
+ * dropdowns, filters and timeline badges. Add or reorder here and it flows
+ * everywhere. `customerVisible` is a forward-looking hook: today the whole
+ * board is internal, but a future customer-facing timeline can filter on this
+ * flag to hide states we'd rather not expose (set it `false` on those).
+ */
 export const REPAIR_STATUSES = [
-    { value: "received", label: "התקבל", color: "#6b7280" },
-    { value: "diagnosing", label: "באבחון", color: "#2f9be6" },
-    { value: "in_progress", label: "בטיפול", color: "#e0a415" },
-    { value: "waiting_part", label: "ממתין לחלק", color: "#b45309" },
-    { value: "ready", label: "מוכן לאיסוף", color: "#98c838" },
-    { value: "delivered", label: "נמסר", color: "#16a34a" },
-    { value: "cancelled", label: "בוטל", color: "#e5484d" },
+    { value: "received", label: "התקבל", color: "#6b7280", customerVisible: true },
+    { value: "diagnosing", label: "באבחון", color: "#2f9be6", customerVisible: true },
+    { value: "in_progress", label: "בטיפול", color: "#e0a415", customerVisible: true },
+    { value: "waiting_part", label: "ממתין לחלק", color: "#b45309", customerVisible: true },
+    { value: "sent_supplier", label: "הועבר לספק", color: "#8b5cf6", customerVisible: true },
+    { value: "awaiting_supplier", label: "ממתין לתשובה מספק", color: "#6d28d9", customerVisible: true },
+    // Supplier outcome branches — one or the other, before the item is ready.
+    { value: "replacement", label: "התקבלה החלפה", color: "#14b8a6", customerVisible: true },
+    { value: "refund", label: "התקבל זיכוי", color: "#0891b2", customerVisible: true },
+    { value: "ready", label: "מוכן לאיסוף", color: "#98c838", customerVisible: true },
+    { value: "delivered", label: "נמסר", color: "#16a34a", customerVisible: true },
+    { value: "cancelled", label: "בוטל", color: "#e5484d", customerVisible: false },
 ];
+
+/** Statuses safe to show a visiting customer (used by any future public view). */
+export const CUSTOMER_STATUSES = REPAIR_STATUSES.filter((s) => s.customerVisible);
 
 export const statusMeta = (value) =>
     REPAIR_STATUSES.find((s) => s.value === value) || REPAIR_STATUSES[0];
