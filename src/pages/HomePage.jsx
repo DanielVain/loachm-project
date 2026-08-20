@@ -90,19 +90,21 @@ export default function HomePage() {
         <div className="min-h-screen">
             <Ticker />
             <Header dark={dark} onToggleTheme={toggleTheme} />
-            {showSkeleton ? (
-                <PageSkeleton />
-            ) : (
-                <div className="content-fade-in">
-                    <Hero />
-                    {sections
-                        .filter((s) => s.visible)
-                        .map((s) => {
-                            const C = SECTION_COMPONENTS[s.id];
-                            return C ? <C key={s.id} /> : null;
-                        })}
-                </div>
-            )}
+            <main id="main">
+                {showSkeleton ? (
+                    <PageSkeleton />
+                ) : (
+                    <div className="content-fade-in">
+                        <Hero />
+                        {sections
+                            .filter((s) => s.visible)
+                            .map((s) => {
+                                const C = SECTION_COMPONENTS[s.id];
+                                return C ? <C key={s.id} /> : null;
+                            })}
+                    </div>
+                )}
+            </main>
         </div>
     );
 }

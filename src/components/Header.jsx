@@ -30,7 +30,10 @@ export default function Header({ dark, onToggleTheme }) {
                         <OpenStatus className="header-open hidden lg:inline-flex" />
                     </div>
 
-                    <nav className="hidden md:flex items-center gap-7 uppercase-mono t-mute">
+                    <nav
+                        aria-label="ניווט ראשי"
+                        className="hidden md:flex items-center gap-7 uppercase-mono t-mute"
+                    >
                         {NAV.map((n) => (
                             <a
                                 key={n.href}
@@ -84,7 +87,10 @@ export default function Header({ dark, onToggleTheme }) {
 
                 {/* Mobile collapsible menu */}
                 {menuOpen && (
-                    <nav className="mobile-menu md:hidden border-t t-rule py-3 flex flex-col">
+                    <nav
+                        aria-label="ניווט נייד"
+                        className="mobile-menu md:hidden border-t t-rule py-3 flex flex-col"
+                    >
                         <div className="pb-3">
                             <OpenStatus />
                         </div>

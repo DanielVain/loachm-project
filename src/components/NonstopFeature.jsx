@@ -29,7 +29,10 @@ export default function NonstopFeature() {
 
                 <div className="grid grid-cols-12 gap-6 md:gap-10 items-end mb-10 md:mb-14">
                     <div className="col-span-12 md:col-span-7">
-                        <div className="flex items-baseline gap-4 md:gap-6 flex-wrap">
+                        <h2
+                            className="flex items-baseline gap-4 md:gap-6 flex-wrap"
+                            aria-label={`${content.brand.lead}${content.brand.accent} ${f.title}`}
+                        >
                             <span
                                 className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.9]"
                                 style={{ letterSpacing: "-0.03em" }}
@@ -39,7 +42,10 @@ export default function NonstopFeature() {
                                     {content.brand.accent}
                                 </span>
                             </span>
-                            <span className="font-mono text-3xl md:text-5xl opacity-40">
+                            <span
+                                aria-hidden="true"
+                                className="font-mono text-3xl md:text-5xl opacity-40"
+                            >
                                 ×
                             </span>
                             <span
@@ -48,7 +54,7 @@ export default function NonstopFeature() {
                             >
                                 {f.title}
                             </span>
-                        </div>
+                        </h2>
                         <p className="font-mono uppercase tracking-[0.22em] text-sm md:text-base mt-5 font-bold nonstop-accent">
                             {f.slogan}
                         </p>
