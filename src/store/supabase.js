@@ -68,9 +68,11 @@ const encodeAs = (canvas, ext, quality) =>
 /**
  * Choose the output format: WebP when the browser can export it (small, and it
  * keeps transparency), otherwise JPEG. We never emit PNG — photos as PNG are
- * huge. Upload transparent images (e.g. logos) from a WebP-capable browser so
- * their alpha is preserved; opaque photos are fine anywhere.
- * Deciding once (from the full-size canvas) keeps both variants in one format.
+ * huge. (Firefox/Chrome export WebP fine; the JPEG path is a safety net for any
+ * browser whose canvas can't.) Upload transparent images (e.g. logos) from a
+ * WebP-capable browser so their alpha is preserved; opaque photos are fine
+ * anywhere. Deciding once (from the full-size canvas) keeps both variants in
+ * one format.
  */
 async function chooseFormat(canvas) {
     const probe = await encodeAs(canvas, "webp", 0.8);
