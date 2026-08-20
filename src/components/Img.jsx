@@ -56,6 +56,7 @@ export default function Img({
             {...props}
             src={show ? src : undefined}
             loading={eager ? "eager" : "lazy"}
+            fetchPriority={eager ? "high" : undefined}
             decoding="async"
             className={cls}
             onLoad={(e) => {

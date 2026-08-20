@@ -50,7 +50,11 @@ function HeroFrame({ images, alt }) {
                     key={src + idx}
                     src={src}
                     alt=""
-                    loading="lazy"
+                    // The first slide is the LCP — load it eagerly with high
+                    // priority; the rest can wait until they're needed.
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    fetchPriority={idx === 0 ? "high" : "low"}
+                    decoding="async"
                     className="hero-frame-slide"
                     style={{ opacity: idx === i ? 1 : 0 }}
                     aria-hidden="true"

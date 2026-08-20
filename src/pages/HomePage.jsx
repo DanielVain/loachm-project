@@ -68,6 +68,7 @@ export default function HomePage() {
         let cancelled = false;
         const ready = () => !cancelled && setHeroReady(true);
         const img = new Image();
+        img.fetchPriority = "high";
         img.onload = ready;
         img.onerror = ready;
         img.src = first;
