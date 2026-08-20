@@ -34,7 +34,7 @@ async function toBitmap(file) {
     }
 }
 
-const MIME = { webp: "image/webp", jpg: "image/jpeg", png: "image/png" };
+const MIME = { webp: "image/webp", jpg: "image/jpeg" };
 
 /** Draw a bitmap onto a canvas, downscaled to fit `maxDim`. */
 function drawCanvas(bitmap, maxDim) {
@@ -48,34 +48,19 @@ function drawCanvas(bitmap, maxDim) {
     return { canvas, ctx };
 }
 
-/** True if any pixel is not fully opaque (so the image needs a format with alpha). */
-function hasTransparency(ctx, w, h) {
-    try {
-        const { data } = ctx.getImageData(0, 0, w, h);
-        for (let i = 3; i < data.length; i += 4) {
-            if (data[i] < 255) return true;
-        }
-        return false;
-    } catch {
-        return true; // can't tell → assume transparency, keep it safe
-    }
-}
-
 const encodeAs = (canvas, ext, quality) =>
     new Promise((resolve) => canvas.toBlob(resolve, MIME[ext], quality));
 
 /**
- * Choose the best output format the browser can actually produce for this image:
- *   • WebP when supported — small *and* keeps transparency (the ideal case).
- *   • Otherwise (older Safari, which can't export WebP): PNG when the image is
- *     transparent — e.g. a logo — since JPEG would fill the alpha with black;
- *     JPEG for opaque photos, which is a fraction of PNG's size.
+ * Choose the output format: WebP when the browser can export it (small, and it
+ * keeps transparency), otherwise JPEG. We never emit PNG — photos as PNG are
+ * huge. Upload transparent images (e.g. logos) from a WebP-capable browser so
+ * their alpha is preserved; opaque photos are fine anywhere.
  * Deciding once (from the full-size canvas) keeps both variants in one format.
  */
-async function chooseFormat(canvas, ctx) {
+async function chooseFormat(canvas) {
     const probe = await encodeAs(canvas, "webp", 0.8);
-    if (probe && probe.type === "image/webp") return "webp";
-    return hasTransparency(ctx, canvas.width, canvas.height) ? "png" : "jpg";
+    return probe && probe.type === "image/webp" ? "webp" : "jpg";
 }
 
 async function uploadBlob(path, body, contentType) {
@@ -110,7 +95,7 @@ export async function uploadProductImage(file) {
             const smallC = drawCanvas(bitmap, 720);
             bitmap.close?.();
             if (fullC && smallC) {
-                const ext = await chooseFormat(fullC.canvas, fullC.ctx);
+                const ext = await chooseFormat(fullC.canvas);
                 const [full, small] = await Promise.all([
                     encodeAs(fullC.canvas, ext, 0.82),
                     encodeAs(smallC.canvas, ext, 0.8),
