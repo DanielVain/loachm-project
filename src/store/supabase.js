@@ -34,8 +34,14 @@ async function toBitmap(file) {
     }
 }
 
-/** Re-encode a decoded bitmap to a WebP Blob, downscaled to fit `maxDim`. */
-async function encodeWebp(bitmap, maxDim, quality) {
+/**
+ * Re-encode a decoded bitmap to a compressed Blob, downscaled to fit `maxDim`.
+ * Prefers WebP, but falls back to JPEG when the browser can't export WebP from a
+ * canvas — notably older Safari, where `toBlob("image/webp")` silently returns a
+ * PNG. PNG is a disastrous choice for photos (hundreds of KB), so we never keep
+ * it: if we didn't get real WebP, we re-encode as JPEG. Returns { blob, ext }.
+ */
+async function encodeVariant(bitmap, maxDim, quality) {
     const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
@@ -47,9 +53,16 @@ async function encodeWebp(bitmap, maxDim, quality) {
     if (!ctx) return null;
     ctx.drawImage(bitmap, 0, 0, width, height);
 
-    return new Promise((resolve) =>
-        canvas.toBlob((b) => resolve(b), "image/webp", quality),
-    );
+    const toBlob = (type) =>
+        new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+
+    let blob = await toBlob("image/webp");
+    if (!blob || blob.type !== "image/webp") {
+        blob = await toBlob("image/jpeg"); // Safari-safe fallback
+    }
+    if (!blob || blob.size === 0) return null;
+    const ext = blob.type === "image/webp" ? "webp" : "jpg";
+    return { blob, ext };
 }
 
 async function uploadBlob(path, body, contentType) {
@@ -65,13 +78,14 @@ const publicUrl = (path) =>
 /**
  * Upload a product photo and return its public URL.
  *
- * When the browser can process the image we store TWO WebP variants that share
- * a base name: a full-size one (`…-full.webp`, for the lightbox) and a small
- * display one (`…-sm.webp`, ~720px, for cards / hero / logos). The returned URL
- * is the full variant; smImage() (data/content.js) derives the small one from
- * it, so the rest of the app still passes a single string around. Non-raster
- * files (e.g. animated GIF) fall back to a single original upload — with no
- * `-full` marker, smImage() leaves those untouched.
+ * When the browser can process the image we store TWO variants that share a
+ * base name: a full-size one (`…-full.<ext>`, for the lightbox) and a small
+ * display one (`…-sm.<ext>`, ~720px, for cards / hero / logos), each WebP where
+ * supported or JPEG otherwise. The returned URL is the full variant; smImage()
+ * (data/content.js) derives the small one from it, so the rest of the app still
+ * passes a single string around. Non-raster files (e.g. animated GIF) fall back
+ * to a single original upload — with no `-full` marker, smImage() leaves those
+ * untouched.
  */
 export async function uploadProductImage(file) {
     const base = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -80,14 +94,14 @@ export async function uploadProductImage(file) {
     if (bitmap) {
         try {
             const [full, small] = await Promise.all([
-                encodeWebp(bitmap, 1600, 0.82),
-                encodeWebp(bitmap, 720, 0.8),
+                encodeVariant(bitmap, 1600, 0.82),
+                encodeVariant(bitmap, 720, 0.8),
             ]);
             bitmap.close?.();
-            if (full?.size > 0 && small?.size > 0) {
-                await uploadBlob(`${base}-full.webp`, full, "image/webp");
-                await uploadBlob(`${base}-sm.webp`, small, "image/webp");
-                return publicUrl(`${base}-full.webp`);
+            if (full && small) {
+                await uploadBlob(`${base}-full.${full.ext}`, full.blob, full.blob.type);
+                await uploadBlob(`${base}-sm.${small.ext}`, small.blob, small.blob.type);
+                return publicUrl(`${base}-full.${full.ext}`);
             }
         } catch {
             bitmap.close?.();

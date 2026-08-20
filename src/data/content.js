@@ -399,8 +399,8 @@ export function resolveSections(layout = {}) {
  * empty string) are returned unchanged, so nothing 404s.
  */
 export const smImage = (url) =>
-    typeof url === "string" && url.includes("-full.webp")
-        ? url.replace("-full.webp", "-sm.webp")
+    typeof url === "string" && url.includes("-full.")
+        ? url.replace("-full.", "-sm.")
         : url;
 
 /** The store photos shown in the hero picture frame (new gallery, or legacy single). */

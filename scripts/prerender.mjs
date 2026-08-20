@@ -51,10 +51,25 @@ const { render } = await import(
 );
 
 const content = await fetchContent();
-const appHtml = render("/", content);
+let appHtml = render("/", content);
+
+// React emits <link rel="preload" as="image"> for the eager hero image at the
+// start of the app markup; hoist it into <head> so the browser discovers the
+// LCP image before it even parses into the body.
+const preloads = [];
+appHtml = appHtml.replace(
+    /<link rel="preload"[^>]*as="image"[^>]*>/g,
+    (tag) => {
+        preloads.push(tag);
+        return "";
+    },
+);
 
 const indexPath = resolve(root, "dist/index.html");
 let html = await readFile(indexPath, "utf8");
+if (preloads.length) {
+    html = html.replace("</head>", `${preloads.join("\n")}\n</head>`);
+}
 
 // Escape "<" so a stray "</script>" in the data can't break out of the block.
 const json = JSON.stringify(content).replace(/</g, "\\u003c");
