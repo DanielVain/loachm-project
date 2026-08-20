@@ -22,23 +22,20 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export const PRODUCT_BUCKET = "product-images";
 
-/**
- * Downscale + re-encode an image to WebP in the browser so uploads stay
- * small and the board loads fast on mobile. Returns a Blob, or null if the
- * file can't/shouldn't be processed (caller then uploads the original).
- */
-async function compressImage(file, maxDim = 1600, quality = 0.82) {
-    // Animated GIFs would lose their animation if flattened — leave as-is.
+/** Decode a File to an ImageBitmap, or null if it isn't a processable raster
+ * (animated GIFs are skipped so they keep their animation). */
+async function toBitmap(file) {
     if (!file.type.startsWith("image/") || file.type === "image/gif")
         return null;
-
-    let bitmap;
     try {
-        bitmap = await createImageBitmap(file);
+        return await createImageBitmap(file);
     } catch {
         return null;
     }
+}
 
+/** Re-encode a decoded bitmap to a WebP Blob, downscaled to fit `maxDim`. */
+async function encodeWebp(bitmap, maxDim, quality) {
     const scale = Math.min(1, maxDim / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
@@ -49,40 +46,58 @@ async function compressImage(file, maxDim = 1600, quality = 0.82) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return null;
     ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close?.();
 
     return new Promise((resolve) =>
         canvas.toBlob((b) => resolve(b), "image/webp", quality),
     );
 }
 
-/** Upload a product photo (compressed when possible) and return its public URL. */
-export async function uploadProductImage(file) {
-    let body = file;
-    let ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-    let contentType = file.type || "image/jpeg";
-
-    try {
-        const compressed = await compressImage(file);
-        // Only use the compressed version if it actually saved bytes.
-        if (compressed && compressed.size > 0 && compressed.size < file.size) {
-            body = compressed;
-            ext = "webp";
-            contentType = "image/webp";
-        }
-    } catch {
-        // Fall back to the original file on any encoding error.
-    }
-
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+async function uploadBlob(path, body, contentType) {
     const { error } = await supabase.storage
         .from(PRODUCT_BUCKET)
-        .upload(path, body, {
-            cacheControl: "31536000",
-            upsert: false,
-            contentType,
-        });
+        .upload(path, body, { cacheControl: "31536000", upsert: false, contentType });
     if (error) throw error;
-    const { data } = supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path);
-    return data.publicUrl;
+}
+
+const publicUrl = (path) =>
+    supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+
+/**
+ * Upload a product photo and return its public URL.
+ *
+ * When the browser can process the image we store TWO WebP variants that share
+ * a base name: a full-size one (`…-full.webp`, for the lightbox) and a small
+ * display one (`…-sm.webp`, ~720px, for cards / hero / logos). The returned URL
+ * is the full variant; smImage() (data/content.js) derives the small one from
+ * it, so the rest of the app still passes a single string around. Non-raster
+ * files (e.g. animated GIF) fall back to a single original upload — with no
+ * `-full` marker, smImage() leaves those untouched.
+ */
+export async function uploadProductImage(file) {
+    const base = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const bitmap = await toBitmap(file);
+
+    if (bitmap) {
+        try {
+            const [full, small] = await Promise.all([
+                encodeWebp(bitmap, 1600, 0.82),
+                encodeWebp(bitmap, 720, 0.8),
+            ]);
+            bitmap.close?.();
+            if (full?.size > 0 && small?.size > 0) {
+                await uploadBlob(`${base}-full.webp`, full, "image/webp");
+                await uploadBlob(`${base}-sm.webp`, small, "image/webp");
+                return publicUrl(`${base}-full.webp`);
+            }
+        } catch {
+            bitmap.close?.();
+            // Fall through to the original-file upload below.
+        }
+    }
+
+    // Fallback: upload the original unchanged (single-variant, no `-full` marker).
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${base}.${ext}`;
+    await uploadBlob(path, file, file.type || "image/jpeg");
+    return publicUrl(path);
 }

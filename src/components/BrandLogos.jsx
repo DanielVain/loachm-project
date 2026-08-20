@@ -1,4 +1,5 @@
 import { useContent } from "../store/ContentContext.jsx";
+import { smImage } from "../data/content.js";
 import Img from "./Img.jsx";
 
 /** A prominent, centered brand showcase: a semi-large title with all the brand
@@ -14,7 +15,7 @@ export default function BrandLogos() {
             <div className="brand-strip-logos">
                 {logos.map((l) => (
                     <div key={l.id} className="brand-logo-item">
-                        <Img src={l.image} alt={l.name} />
+                        <Img src={smImage(l.image)} alt={l.name} />
                     </div>
                 ))}
             </div>

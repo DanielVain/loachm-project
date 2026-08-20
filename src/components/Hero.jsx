@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Flame, MapPin } from "lucide-react";
 import { useContent } from "../store/ContentContext.jsx";
-import { heroImageList } from "../data/content.js";
+import { heroImageList, smImage } from "../data/content.js";
 import Led from "./Led.jsx";
 import Img from "./Img.jsx";
 import BrandLogos from "./BrandLogos.jsx";
@@ -34,7 +34,7 @@ function HeroFrame({ images, alt }) {
     if (images.length === 1) {
         return (
             <div className="hero-frame hero-frame-tall">
-                <Img src={images[0]} alt={alt} eager />
+                <Img src={smImage(images[0])} alt={alt} eager />
             </div>
         );
     }
@@ -48,7 +48,7 @@ function HeroFrame({ images, alt }) {
             {images.map((src, idx) => (
                 <img
                     key={src + idx}
-                    src={src}
+                    src={smImage(src)}
                     alt=""
                     // The first slide is the LCP — load it eagerly with high
                     // priority; the rest can wait until they're needed.

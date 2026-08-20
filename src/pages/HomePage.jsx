@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useContent } from "../store/ContentContext.jsx";
-import { resolveSections, heroImageList } from "../data/content.js";
+import { resolveSections, heroImageList, smImage } from "../data/content.js";
 import Ticker from "../components/Ticker.jsx";
 import Header from "../components/Header.jsx";
 import Hero from "../components/Hero.jsx";
@@ -59,7 +59,8 @@ export default function HomePage() {
     const [heroReady, setHeroReady] = useState(false);
     useEffect(() => {
         if (loading) return;
-        const urls = heroImageList(content.layout);
+        // Preload the small variant — the exact bytes the hero renders.
+        const urls = heroImageList(content.layout).map(smImage);
         const first = urls[0];
         if (!first) {
             setHeroReady(true);

@@ -392,6 +392,17 @@ export function resolveSections(layout = {}) {
     return out;
 }
 
+/**
+ * Small display variant of an uploaded image, for cards / hero / logos.
+ * New uploads store a `…-full.webp` + `…-sm.webp` pair (see uploadProductImage);
+ * derive the small one from the full URL. Legacy or non-paired URLs (and the
+ * empty string) are returned unchanged, so nothing 404s.
+ */
+export const smImage = (url) =>
+    typeof url === "string" && url.includes("-full.webp")
+        ? url.replace("-full.webp", "-sm.webp")
+        : url;
+
 /** The store photos shown in the hero picture frame (new gallery, or legacy single). */
 export function heroImageList(layout = {}) {
     const list = Array.isArray(layout.heroImages) ? layout.heroImages : [];
