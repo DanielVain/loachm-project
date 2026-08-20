@@ -6,12 +6,19 @@ import { FontaineTransform } from 'fontaine'
 export default defineConfig({
   plugins: [
     react(),
-    // Generate metric-matched fallback fonts for every web font, so the text
-    // occupies the same space before the real font loads. The web fonts still
-    // load and apply (font-display: swap), but the swap no longer reflows the
-    // layout — which removes the font-driven CLS while keeping the brand fonts.
+    // Metric-matched fallback fonts: the fallback occupies the same space as the
+    // real web font, so when the font swaps in there's no reflow (removes the
+    // font-driven CLS) while the brand fonts still load and apply.
+    //
+    // We only match the body text fonts (Manrope, Heebo). We SKIP:
+    //  • JetBrains Mono — a proportional (Arial) fallback breaks monospace layout.
+    //  • Archivo Black — the heavy display face's large size-adjust overlaps the
+    //    big hero heading. These keep their generic fallback + font-display:swap.
     FontaineTransform.vite({
       fallbacks: ['Arial', 'Helvetica', 'sans-serif'],
+      skipFontFaceGeneration: (fallbackName) =>
+        fallbackName === 'JetBrains Mono fallback' ||
+        fallbackName === 'Archivo Black fallback',
     }),
   ],
 })
