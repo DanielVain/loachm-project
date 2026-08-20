@@ -11,6 +11,26 @@ import { supabase } from "./supabase.js";
 
 const ContentContext = createContext(null);
 
+const CACHE_KEY = "loachm:content:v1";
+
+/** Last-known content, cached so a returning visitor paints real content
+ * immediately instead of waiting on the network round-trip. Best-effort —
+ * any storage/parse error just means "no cache". */
+function readCache() {
+    try {
+        return JSON.parse(localStorage.getItem(CACHE_KEY)) || null;
+    } catch {
+        return null;
+    }
+}
+function writeCache(payload) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+    } catch {
+        /* quota exceeded / unavailable — non-fatal */
+    }
+}
+
 /** Keep only the columns that exist on the `deals` table. */
 const toRow = (d) => ({
     id: d.id,
@@ -53,10 +73,15 @@ async function fetchSite() {
 }
 
 export function ContentProvider({ children }) {
+    const cached = readCache();
     // null = loading; [] = loaded-empty; array = loaded
-    const [deals, setDeals] = useState(null);
+    const [deals, setDeals] = useState(cached?.deals ?? null);
     // Editable site-content overrides (merged over DEFAULT_CONTENT).
-    const [site, setSite] = useState({});
+    const [site, setSite] = useState(cached?.site ?? {});
+    // Whether we have site content yet (from cache or the first fetch). The
+    // hero / above-the-fold need only this — not the separate deals query — so
+    // the page can paint without waiting for the board to load.
+    const [siteLoaded, setSiteLoaded] = useState(!!cached);
 
     // Latest values for use inside debounced callbacks.
     const dealsRef = useRef([]);
@@ -83,7 +108,9 @@ export function ContentProvider({ children }) {
             setDeals(d ?? DEFAULT_CONTENT.deals);
         });
         fetchSite().then((s) => {
-            if (active && s) setSite(s);
+            if (!active) return;
+            if (s) setSite(s);
+            setSiteLoaded(true);
         });
 
         const channel = supabase
@@ -122,6 +149,12 @@ export function ContentProvider({ children }) {
             supabase.removeChannel(channel);
         };
     }, []);
+
+    // Persist the latest content so the next visit paints instantly.
+    useEffect(() => {
+        if (deals === null) return; // don't cache the loading placeholder
+        writeCache({ deals, site });
+    }, [deals, site]);
 
     // Merge defaults ← saved overrides ← live deals.
     const content = useMemo(
@@ -186,6 +219,7 @@ export function ContentProvider({ children }) {
         return {
             content,
             loading: deals === null,
+            siteReady: siteLoaded,
 
             /** Patch editable site content (ticker, featured, extras, ui…). */
             updateSite(patch) {
@@ -250,7 +284,7 @@ export function ContentProvider({ children }) {
                 return null;
             },
         };
-    }, [content, deals]);
+    }, [content, deals, siteLoaded]);
 
     return (
         <ContentContext.Provider value={api}>

@@ -33,7 +33,7 @@ const initialDark = () => {
 
 /** The public storefront. */
 export default function HomePage() {
-    const { content, loading } = useContent();
+    const { content, siteReady } = useContent();
     const [dark, setDark] = useState(initialDark);
 
     useEffect(() => {
@@ -58,7 +58,7 @@ export default function HomePage() {
     // timeout makes sure the skeleton never hangs on a slow/broken image.
     const [heroReady, setHeroReady] = useState(false);
     useEffect(() => {
-        if (loading) return;
+        if (!siteReady) return;
         // Preload the small variant — the exact bytes the hero renders.
         const urls = heroImageList(content.layout).map(smImage);
         const first = urls[0];
@@ -83,10 +83,12 @@ export default function HomePage() {
             cancelled = true;
             clearTimeout(t);
         };
-    }, [loading, content.layout]);
+    }, [siteReady, content.layout]);
 
     const sections = resolveSections(content.layout);
-    const showSkeleton = loading || !heroReady;
+    // The board loads separately (DealsGrid shows its own skeleton); the page
+    // only waits on the small site-content payload + the hero image.
+    const showSkeleton = !siteReady || !heroReady;
 
     return (
         <div className="min-h-screen">
