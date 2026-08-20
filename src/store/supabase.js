@@ -1,7 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-
 /* ───────────────────────────────────────────────────────────────
-   Supabase client.
+   Supabase client — loaded lazily.
 
    The URL and anon key are PUBLIC by design — they ship in every
    browser bundle. What protects your data is Row Level Security
@@ -9,6 +7,12 @@ import { createClient } from "@supabase/supabase-js";
    signed-in admin can write. Env vars override the baked-in
    defaults so you can point at a different project without a build
    change.
+
+   The @supabase/supabase-js SDK is ~50 KB gzipped and isn't needed
+   for the first paint (the storefront renders from prerendered HTML +
+   seeded content). So we import it dynamically via getSupabase(): it
+   stays out of the initial bundle and only loads once we actually talk
+   to the backend — after paint for live updates, or in the admin.
    ─────────────────────────────────────────────────────────────── */
 const SUPABASE_URL =
     import.meta.env.VITE_SUPABASE_URL ||
@@ -18,7 +22,17 @@ const SUPABASE_ANON_KEY =
     import.meta.env.VITE_SUPABASE_ANON_KEY ||
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxcW52aXhyY2ZoaHpibnlzdndxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMjk4MzgsImV4cCI6MjA5NjYwNTgzOH0.tUZ9NjyD9kfh9k6PBu_pgzVIRXJrZOJfEGFUimYK-u0";
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let clientPromise;
+
+/** Lazily create (once) and return the Supabase client. */
+export function getSupabase() {
+    if (!clientPromise) {
+        clientPromise = import("@supabase/supabase-js").then(({ createClient }) =>
+            createClient(SUPABASE_URL, SUPABASE_ANON_KEY),
+        );
+    }
+    return clientPromise;
+}
 
 export const PRODUCT_BUCKET = "product-images";
 
@@ -64,14 +78,17 @@ async function chooseFormat(canvas) {
 }
 
 async function uploadBlob(path, body, contentType) {
+    const supabase = await getSupabase();
     const { error } = await supabase.storage
         .from(PRODUCT_BUCKET)
         .upload(path, body, { cacheControl: "31536000", upsert: false, contentType });
     if (error) throw error;
 }
 
-const publicUrl = (path) =>
-    supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+async function publicUrl(path) {
+    const supabase = await getSupabase();
+    return supabase.storage.from(PRODUCT_BUCKET).getPublicUrl(path).data.publicUrl;
+}
 
 /**
  * Upload a product photo and return its public URL.

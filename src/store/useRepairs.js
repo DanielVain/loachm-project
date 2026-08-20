@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "./supabase.js";
+import { getSupabase } from "./supabase.js";
 import { newId } from "../data/content.js";
 
 /* Admin-only repair tickets. RLS restricts every operation to authenticated
@@ -27,7 +27,7 @@ const newMovement = (mv = {}) => ({
     ...mv,
 });
 
-async function fetchRepairs() {
+async function fetchRepairs(supabase) {
     const { data, error } = await supabase
         .from("repairs")
         .select("*")
@@ -51,35 +51,42 @@ export function useRepairs() {
 
     useEffect(() => {
         let active = true;
-        fetchRepairs().then((d) => {
-            if (active) setRepairs(d ?? []);
-        });
+        let sb = null;
+        let channel = null;
 
-        const channel = supabase
-            .channel("admin:repairs")
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "repairs" },
-                async () => {
-                    const fresh = await fetchRepairs();
-                    if (!active || !fresh) return;
-                    setRepairs((prev) => {
-                        const local = new Map(
-                            (prev || []).map((r) => [r.id, r]),
-                        );
-                        return fresh.map((r) =>
-                            dirty.current.has(r.id) && local.has(r.id)
-                                ? local.get(r.id)
-                                : r,
-                        );
-                    });
-                },
-            )
-            .subscribe();
+        getSupabase().then((supabase) => {
+            if (!active) return;
+            sb = supabase;
+            fetchRepairs(supabase).then((d) => {
+                if (active) setRepairs(d ?? []);
+            });
+
+            channel = supabase
+                .channel("admin:repairs")
+                .on(
+                    "postgres_changes",
+                    { event: "*", schema: "public", table: "repairs" },
+                    async () => {
+                        const fresh = await fetchRepairs(supabase);
+                        if (!active || !fresh) return;
+                        setRepairs((prev) => {
+                            const local = new Map(
+                                (prev || []).map((r) => [r.id, r]),
+                            );
+                            return fresh.map((r) =>
+                                dirty.current.has(r.id) && local.has(r.id)
+                                    ? local.get(r.id)
+                                    : r,
+                            );
+                        });
+                    },
+                )
+                .subscribe();
+        });
 
         return () => {
             active = false;
-            supabase.removeChannel(channel);
+            if (sb && channel) sb.removeChannel(channel);
         };
     }, []);
 
@@ -94,6 +101,7 @@ export function useRepairs() {
                     ...toRow(row),
                     updated_at: new Date().toISOString(),
                 };
+                const supabase = await getSupabase();
                 let { error } = await supabase
                     .from("repairs")
                     .update(payload)
@@ -128,6 +136,7 @@ export function useRepairs() {
                     created_at: new Date().toISOString(),
                 };
                 setRepairs((r) => [item, ...(r || [])]);
+                const supabase = await getSupabase();
                 let { error } = await supabase
                     .from("repairs")
                     .insert(toRow(item));
@@ -179,6 +188,7 @@ export function useRepairs() {
                 setRepairs((r) => (r || []).filter((x) => x.id !== id));
                 dirty.current.delete(id);
                 clearTimeout(timers.current[id]);
+                const supabase = await getSupabase();
                 const { error } = await supabase
                     .from("repairs")
                     .delete()

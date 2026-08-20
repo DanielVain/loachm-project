@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 import { DEFAULT_CONTENT, newId } from "../data/content.js";
-import { supabase } from "./supabase.js";
+import { getSupabase } from "./supabase.js";
 
 const ContentContext = createContext(null);
 
@@ -59,7 +59,7 @@ const toRow = (d) => ({
     sort: Number(d.sort) || 0,
 });
 
-async function fetchDeals() {
+async function fetchDeals(supabase) {
     const { data, error } = await supabase
         .from("deals")
         .select("*")
@@ -72,7 +72,7 @@ async function fetchDeals() {
     return data;
 }
 
-async function fetchSite() {
+async function fetchSite(supabase) {
     const { data, error } = await supabase
         .from("site_content")
         .select("data")
@@ -114,54 +114,63 @@ export function ContentProvider({ children, initialContent }) {
     const siteTimer = useRef(null);
     const siteDirty = useRef(false);
 
-    // Initial load + realtime sync (so every visitor updates live).
+    // Initial load + realtime sync (so every visitor updates live). Supabase is
+    // loaded lazily here — after the first paint — so its SDK stays out of the
+    // critical bundle; the page has already rendered from the seeded content.
     useEffect(() => {
         let active = true;
+        let sb = null;
+        let channel = null;
 
-        fetchDeals().then((d) => {
+        getSupabase().then((supabase) => {
             if (!active) return;
-            setDeals(d ?? DEFAULT_CONTENT.deals);
-        });
-        fetchSite().then((s) => {
-            if (!active) return;
-            if (s) setSite(s);
-            setSiteLoaded(true);
-        });
+            sb = supabase;
 
-        const channel = supabase
-            .channel("public:content")
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "deals" },
-                async () => {
-                    const fresh = await fetchDeals();
-                    if (!active || !fresh) return;
-                    setDeals((prev) => {
-                        const localById = new Map(
-                            (prev || []).map((d) => [d.id, d]),
-                        );
-                        return fresh.map((r) =>
-                            dirtyRef.current.has(r.id) && localById.has(r.id)
-                                ? localById.get(r.id)
-                                : r,
-                        );
-                    });
-                },
-            )
-            .on(
-                "postgres_changes",
-                { event: "*", schema: "public", table: "site_content" },
-                async () => {
-                    if (siteDirty.current) return; // don't clobber active edits
-                    const s = await fetchSite();
-                    if (active && s) setSite(s);
-                },
-            )
-            .subscribe();
+            fetchDeals(supabase).then((d) => {
+                if (active) setDeals(d ?? DEFAULT_CONTENT.deals);
+            });
+            fetchSite(supabase).then((s) => {
+                if (!active) return;
+                if (s) setSite(s);
+                setSiteLoaded(true);
+            });
+
+            channel = supabase
+                .channel("public:content")
+                .on(
+                    "postgres_changes",
+                    { event: "*", schema: "public", table: "deals" },
+                    async () => {
+                        const fresh = await fetchDeals(supabase);
+                        if (!active || !fresh) return;
+                        setDeals((prev) => {
+                            const localById = new Map(
+                                (prev || []).map((d) => [d.id, d]),
+                            );
+                            return fresh.map((r) =>
+                                dirtyRef.current.has(r.id) &&
+                                localById.has(r.id)
+                                    ? localById.get(r.id)
+                                    : r,
+                            );
+                        });
+                    },
+                )
+                .on(
+                    "postgres_changes",
+                    { event: "*", schema: "public", table: "site_content" },
+                    async () => {
+                        if (siteDirty.current) return; // don't clobber edits
+                        const s = await fetchSite(supabase);
+                        if (active && s) setSite(s);
+                    },
+                )
+                .subscribe();
+        });
 
         return () => {
             active = false;
-            supabase.removeChannel(channel);
+            if (sb && channel) sb.removeChannel(channel);
         };
     }, []);
 
@@ -205,6 +214,7 @@ export function ContentProvider({ children, initialContent }) {
             timersRef.current[id] = setTimeout(async () => {
                 const row = dealsRef.current.find((d) => d.id === id);
                 if (!row) return;
+                const supabase = await getSupabase();
                 const { error } = await supabase
                     .from("deals")
                     .update({
@@ -221,6 +231,7 @@ export function ContentProvider({ children, initialContent }) {
             siteDirty.current = true;
             clearTimeout(siteTimer.current);
             siteTimer.current = setTimeout(async () => {
+                const supabase = await getSupabase();
                 const { error } = await supabase.from("site_content").upsert({
                     id: "main",
                     data: siteRef.current,
@@ -258,6 +269,7 @@ export function ContentProvider({ children, initialContent }) {
                     ...partial,
                 };
                 setDeals((d) => [item, ...(d || [])]);
+                const supabase = await getSupabase();
                 const { error } = await supabase
                     .from("deals")
                     .insert(toRow(item));
@@ -278,6 +290,7 @@ export function ContentProvider({ children, initialContent }) {
                 setDeals((d) => (d || []).filter((x) => x.id !== id));
                 dirtyRef.current.delete(id);
                 clearTimeout(timersRef.current[id]);
+                const supabase = await getSupabase();
                 const { error } = await supabase
                     .from("deals")
                     .delete()
@@ -289,12 +302,13 @@ export function ContentProvider({ children, initialContent }) {
                 const rows = DEFAULT_CONTENT.deals.map((d, i) =>
                     toRow({ ...d, sort: i }),
                 );
+                const supabase = await getSupabase();
                 const { error } = await supabase.from("deals").insert(rows);
                 if (error) {
                     console.warn("Seed failed:", error.message);
                     return error.message;
                 }
-                const fresh = await fetchDeals();
+                const fresh = await fetchDeals(supabase);
                 if (fresh) setDeals(fresh);
                 return null;
             },

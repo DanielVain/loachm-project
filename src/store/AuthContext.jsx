@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { supabase } from "./supabase.js";
+import { getSupabase } from "./supabase.js";
 
 const AuthContext = createContext(null);
 
@@ -8,11 +8,21 @@ export function AuthProvider({ children }) {
     const [session, setSession] = useState(undefined);
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data }) => setSession(data.session));
-        const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
-            setSession(s),
-        );
-        return () => sub.subscription.unsubscribe();
+        let active = true;
+        let subscription;
+        getSupabase().then((supabase) => {
+            if (!active) return;
+            supabase.auth
+                .getSession()
+                .then(({ data }) => active && setSession(data.session));
+            subscription = supabase.auth.onAuthStateChange((_e, s) =>
+                setSession(s),
+            ).data.subscription;
+        });
+        return () => {
+            active = false;
+            subscription?.unsubscribe();
+        };
     }, []);
 
     const value = {
@@ -20,6 +30,7 @@ export function AuthProvider({ children }) {
         loading: session === undefined,
         isAuthed: !!session,
         async signIn(email, password) {
+            const supabase = await getSupabase();
             const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -27,6 +38,7 @@ export function AuthProvider({ children }) {
             return error ? error.message : null;
         },
         async signOut() {
+            const supabase = await getSupabase();
             await supabase.auth.signOut();
         },
     };
