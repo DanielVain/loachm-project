@@ -81,7 +81,12 @@ const cssLink = html.match(
     /<link rel="stylesheet"[^>]*href="(\/assets\/[^"]+\.css)"[^>]*>/,
 );
 if (cssLink) {
-    const css = await readFile(resolve(root, "dist", cssLink[1].slice(1)), "utf8");
+    let css = await readFile(resolve(root, "dist", cssLink[1].slice(1)), "utf8");
+    // font-display: optional — the page paints instantly in a fallback font and
+    // never swaps to the web font mid-view, so the big hero heading can't reflow
+    // (that swap was the entire CLS). Fonts still apply once cached / on the next
+    // load; this just trades a first-paint font swap for zero layout shift.
+    css = css.replace(/font-display\s*:\s*swap/g, "font-display:optional");
     html = html.replace(cssLink[0], `<style>${css}</style>`);
 }
 
