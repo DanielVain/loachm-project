@@ -31,6 +31,19 @@ function writeCache(payload) {
     }
 }
 
+/** Content baked into the page by the build-time prerender (see
+ * scripts/prerender.mjs) as a non-executable JSON block. Present on the very
+ * first paint, so the client renders the same hero the HTML already shows. */
+function readInjected() {
+    if (typeof document === "undefined") return null;
+    try {
+        const el = document.getElementById("__INITIAL_CONTENT__");
+        return el ? JSON.parse(el.textContent) : null;
+    } catch {
+        return null;
+    }
+}
+
 /** Keep only the columns that exist on the `deals` table. */
 const toRow = (d) => ({
     id: d.id,
@@ -72,16 +85,18 @@ async function fetchSite() {
     return data?.data ?? {};
 }
 
-export function ContentProvider({ children }) {
-    const cached = readCache();
+export function ContentProvider({ children, initialContent }) {
+    // Seed from (1) the build-time prerender on the server, (2) the injected
+    // JSON block on the client's first paint, then (3) the localStorage cache.
+    const seed = initialContent || readInjected() || readCache();
     // null = loading; [] = loaded-empty; array = loaded
-    const [deals, setDeals] = useState(cached?.deals ?? null);
+    const [deals, setDeals] = useState(seed?.deals ?? null);
     // Editable site-content overrides (merged over DEFAULT_CONTENT).
-    const [site, setSite] = useState(cached?.site ?? {});
-    // Whether we have site content yet (from cache or the first fetch). The
+    const [site, setSite] = useState(seed?.site ?? {});
+    // Whether we have site content yet (from a seed or the first fetch). The
     // hero / above-the-fold need only this — not the separate deals query — so
     // the page can paint without waiting for the board to load.
-    const [siteLoaded, setSiteLoaded] = useState(!!cached);
+    const [siteLoaded, setSiteLoaded] = useState(!!seed);
 
     // Latest values for use inside debounced callbacks.
     const dealsRef = useRef([]);
