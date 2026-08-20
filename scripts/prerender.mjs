@@ -74,6 +74,17 @@ appHtml = appHtml.replace(/<link rel="preload"[^>]*as="image"[^>]*>/g, "");
 const indexPath = resolve(root, "dist/index.html");
 let html = await readFile(indexPath, "utf8");
 
+// Inline the stylesheet so first paint doesn't wait on a separate render-
+// blocking CSS request. The whole bundle is small (~8 KB gzipped) and the
+// storefront is a single page, so shipping it in <head> is a net win.
+const cssLink = html.match(
+    /<link rel="stylesheet"[^>]*href="(\/assets\/[^"]+\.css)"[^>]*>/,
+);
+if (cssLink) {
+    const css = await readFile(resolve(root, "dist", cssLink[1].slice(1)), "utf8");
+    html = html.replace(cssLink[0], `<style>${css}</style>`);
+}
+
 const heroUrl = heroLcpUrl(content.site);
 if (heroUrl) {
     const preload = `<link rel="preload" as="image" href="${heroUrl}" fetchpriority="high"/>`;
