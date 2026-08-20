@@ -20,16 +20,35 @@ function useClock() {
 /** Hero picture frame — a single photo, or a crossfading gallery of store photos. */
 function HeroFrame({ images, alt }) {
     const [i, setI] = useState(0);
+    // Which slides have been requested. Only these get a real `src`, so the
+    // gallery doesn't download every photo up front (they're stacked in the
+    // viewport, so `loading="lazy"` can't defer them). Just the first — the
+    // LCP — loads immediately; each next one is fetched while the current is
+    // showing, so it's ready by the time the crossfade reaches it.
+    const [requested, setRequested] = useState(() => new Set([0]));
 
     useEffect(() => {
         if (images.length < 2) return;
         setI(0);
+        setRequested(new Set([0]));
         const t = setInterval(
             () => setI((n) => (n + 1) % images.length),
             2600,
         );
         return () => clearInterval(t);
     }, [images.length]);
+
+    // Preload the upcoming slide while the current one is on screen.
+    useEffect(() => {
+        if (images.length < 2) return;
+        const next = (i + 1) % images.length;
+        setRequested((prev) => {
+            if (prev.has(next)) return prev;
+            const s = new Set(prev);
+            s.add(next);
+            return s;
+        });
+    }, [i, images.length]);
 
     if (images.length === 1) {
         return (
@@ -48,10 +67,11 @@ function HeroFrame({ images, alt }) {
             {images.map((src, idx) => (
                 <img
                     key={src + idx}
-                    src={smImage(src)}
+                    src={requested.has(idx) ? smImage(src) : undefined}
                     alt=""
                     // The first slide is the LCP — load it eagerly with high
-                    // priority; the rest can wait until they're needed.
+                    // priority; the rest are low priority and only get a src
+                    // once requested, so they never compete with the LCP.
                     loading={idx === 0 ? "eager" : "lazy"}
                     fetchPriority={idx === 0 ? "high" : "low"}
                     decoding="async"
