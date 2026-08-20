@@ -30,6 +30,19 @@ async function rest(path) {
     return res.json();
 }
 
+/** URL of the image the hero paints first (the LCP), as its small variant —
+ * mirrors heroImageList() + smImage() in src/data/content.js. Empty when the
+ * hero shows the weekly-sale box instead of a photo. */
+function heroLcpUrl(site) {
+    const layout = site?.layout || {};
+    if (layout.heroPanel && layout.heroPanel !== "image") return "";
+    const list = Array.isArray(layout.heroImages)
+        ? layout.heroImages.filter((s) => typeof s === "string" && s.trim())
+        : [];
+    const first = list[0] || layout.heroImage || "";
+    return first.includes("-full.") ? first.replace("-full.", "-sm.") : first;
+}
+
 async function fetchContent() {
     try {
         const [siteRows, deals] = await Promise.all([
@@ -53,22 +66,18 @@ const { render } = await import(
 const content = await fetchContent();
 let appHtml = render("/", content);
 
-// React emits <link rel="preload" as="image"> for the eager hero image at the
-// start of the app markup; hoist it into <head> so the browser discovers the
-// LCP image before it even parses into the body.
-const preloads = [];
-appHtml = appHtml.replace(
-    /<link rel="preload"[^>]*as="image"[^>]*>/g,
-    (tag) => {
-        preloads.push(tag);
-        return "";
-    },
-);
+// Drop any image preloads React emitted into the body — we inject our own,
+// explicit one into <head> below so the LCP hero image is discoverable the
+// instant the document arrives, regardless of how the hero renders.
+appHtml = appHtml.replace(/<link rel="preload"[^>]*as="image"[^>]*>/g, "");
 
 const indexPath = resolve(root, "dist/index.html");
 let html = await readFile(indexPath, "utf8");
-if (preloads.length) {
-    html = html.replace("</head>", `${preloads.join("\n")}\n</head>`);
+
+const heroUrl = heroLcpUrl(content.site);
+if (heroUrl) {
+    const preload = `<link rel="preload" as="image" href="${heroUrl}" fetchpriority="high"/>`;
+    html = html.replace("</head>", `    ${preload}\n</head>`);
 }
 
 // Escape "<" so a stray "</script>" in the data can't break out of the block.
